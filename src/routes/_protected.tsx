@@ -4,7 +4,12 @@ import {
   Outlet,
   redirect,
 } from "@tanstack/react-router";
-import { ChevronRight, FlaskConical, LayoutDashboard } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ChevronRight,
+  FlaskConical,
+  LayoutDashboard,
+} from "lucide-react";
 import { Brand } from "@/components/brand";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +55,14 @@ function ProtectedLayout() {
         </nav>
         <div className="stock-sidebar-bottom">
           <Separator />
+          <Link
+            to="/barang-masuk"
+            className="stock-nav-link"
+            activeProps={{ "aria-current": "page" }}
+          >
+            <ArrowDownLeft aria-hidden="true" />
+            Barang masuk
+          </Link>
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
             <FlaskConical className="size-4" aria-hidden="true" />
             Data contoh

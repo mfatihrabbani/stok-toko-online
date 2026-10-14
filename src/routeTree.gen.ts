@@ -16,6 +16,7 @@ import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as ProtectedAdminRouteImport } from './routes/_protected/admin'
 import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
+import { Route as ProtectedBarangMasukRouteImport } from './routes/_protected/barang-masuk'
 import { Route as ProtectedProductsIdRouteImport } from './routes/_protected/products/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
@@ -56,6 +57,11 @@ const ProtectedAppRoute = ProtectedAppRouteImport.update({
   path: '/app',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedBarangMasukRoute = ProtectedBarangMasukRouteImport.update({
+  id: '/barang-masuk',
+  path: '/barang-masuk',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedProductsIdRoute = ProtectedProductsIdRouteImport.update({
   id: '/products/$id',
   path: '/products/$id',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
   '/app': typeof ProtectedAppRoute
+  '/barang-masuk': typeof ProtectedBarangMasukRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
   '/app': typeof ProtectedAppRoute
+  '/barang-masuk': typeof ProtectedBarangMasukRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/_protected/admin': typeof ProtectedAdminRoute
   '/_protected/app': typeof ProtectedAppRoute
+  '/_protected/barang-masuk': typeof ProtectedBarangMasukRoute
   '/_protected/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/admin'
     | '/app'
+    | '/barang-masuk'
     | '/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/admin'
     | '/app'
+    | '/barang-masuk'
     | '/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/_auth/sign-up'
     | '/_protected/admin'
     | '/_protected/app'
+    | '/_protected/barang-masuk'
     | '/_protected/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -235,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAppRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/barang-masuk': {
+      id: '/_protected/barang-masuk'
+      path: '/barang-masuk'
+      fullPath: '/barang-masuk'
+      preLoaderRoute: typeof ProtectedBarangMasukRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/products/$id': {
       id: '/_protected/products/$id'
       path: '/products/$id'
@@ -295,12 +314,14 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 interface ProtectedRouteChildren {
   ProtectedAdminRoute: typeof ProtectedAdminRoute
   ProtectedAppRoute: typeof ProtectedAppRoute
+  ProtectedBarangMasukRoute: typeof ProtectedBarangMasukRoute
   ProtectedProductsIdRoute: typeof ProtectedProductsIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAdminRoute: ProtectedAdminRoute,
   ProtectedAppRoute: ProtectedAppRoute,
+  ProtectedBarangMasukRoute: ProtectedBarangMasukRoute,
   ProtectedProductsIdRoute: ProtectedProductsIdRoute,
 }
 

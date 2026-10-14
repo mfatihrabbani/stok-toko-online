@@ -8,6 +8,8 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/products/1");
   await expect(page).toHaveURL(/\/sign-in$/);
+  await page.goto("/barang-masuk");
+  await expect(page).toHaveURL(/\/sign-in$/);
   const signup = {
     headers: { Origin: "http://localhost:3101" },
     data: {
@@ -130,6 +132,31 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
   await expect
     .poll(() => page.evaluate(() => window.scrollY))
     .toBeGreaterThan(beforeDetailScroll - 40);
+  await page
+    .getByRole("main")
+    .getByRole("link", { name: "Barang masuk", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Barang masuk", exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Jumlah masuk", { exact: true }).fill("10");
+  await page
+    .getByLabel("Catatan (opsional)", { exact: true })
+    .fill("Restok dari pemasok");
+  await expect(
+    page.getByRole("complementary", { name: "Ringkasan barang masuk" }),
+  ).toContainText("58 unit");
+  await page
+    .getByRole("button", { name: "Tinjau catatan", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Tinjau barang masuk", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Ubah catatan", exact: true }).click();
+  await expect(page.getByLabel("Jumlah masuk", { exact: true })).toHaveValue(
+    "10",
+  );
+  await page.getByRole("link", { name: "Batal", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(
     page.getByRole("heading", { name: "Stok barang", exact: true }),
