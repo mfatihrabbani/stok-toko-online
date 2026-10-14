@@ -10,6 +10,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   Package,
+  History,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -61,6 +62,14 @@ function ProtectedLayout() {
             >
               <Package aria-hidden="true" />
               Produk
+            </Link>
+            <Link
+              to="/riwayat"
+              className="stock-nav-link"
+              activeProps={{ "aria-current": "page" }}
+            >
+              <History aria-hidden="true" />
+              Riwayat
             </Link>
           </div>
         </nav>

@@ -19,6 +19,7 @@ import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
 import { Route as ProtectedBarangKeluarRouteImport } from './routes/_protected/barang-keluar'
 import { Route as ProtectedBarangMasukRouteImport } from './routes/_protected/barang-masuk'
 import { Route as ProtectedProdukRouteImport } from './routes/_protected/produk'
+import { Route as ProtectedRiwayatRouteImport } from './routes/_protected/riwayat'
 import { Route as ProtectedProductsIdRouteImport } from './routes/_protected/products/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
@@ -78,6 +79,11 @@ const ProtectedBarangMasukRoute = ProtectedBarangMasukRouteImport.update({
 const ProtectedProdukRoute = ProtectedProdukRouteImport.update({
   id: '/produk',
   path: '/produk',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedRiwayatRoute = ProtectedRiwayatRouteImport.update({
+  id: '/riwayat',
+  path: '/riwayat',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedProductsIdRoute = ProtectedProductsIdRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
   '/produk': typeof ProtectedProdukRoute
+  '/riwayat': typeof ProtectedRiwayatRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
   '/produk': typeof ProtectedProdukRoute
+  '/riwayat': typeof ProtectedRiwayatRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/_protected/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/_protected/barang-masuk': typeof ProtectedBarangMasukRoute
   '/_protected/produk': typeof ProtectedProdukRoute
+  '/_protected/riwayat': typeof ProtectedRiwayatRoute
   '/_protected/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/barang-keluar'
     | '/barang-masuk'
     | '/produk'
+    | '/riwayat'
     | '/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/barang-keluar'
     | '/barang-masuk'
     | '/produk'
+    | '/riwayat'
     | '/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/_protected/barang-keluar'
     | '/_protected/barang-masuk'
     | '/_protected/produk'
+    | '/_protected/riwayat'
     | '/_protected/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
@@ -368,6 +380,13 @@ declare module '@tanstack/react-router' {
       path: '/produk'
       fullPath: '/produk'
       preLoaderRoute: typeof ProtectedProdukRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/riwayat': {
+      id: '/_protected/riwayat'
+      path: '/riwayat'
+      fullPath: '/riwayat'
+      preLoaderRoute: typeof ProtectedRiwayatRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/products/$id': {
@@ -475,6 +494,7 @@ interface ProtectedRouteChildren {
   ProtectedBarangKeluarRoute: typeof ProtectedBarangKeluarRoute
   ProtectedBarangMasukRoute: typeof ProtectedBarangMasukRoute
   ProtectedProdukRoute: typeof ProtectedProdukRoute
+  ProtectedRiwayatRoute: typeof ProtectedRiwayatRoute
   ProtectedProductsIdRoute: typeof ProtectedProductsIdRoute
 }
 
@@ -484,6 +504,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedBarangKeluarRoute: ProtectedBarangKeluarRoute,
   ProtectedBarangMasukRoute: ProtectedBarangMasukRoute,
   ProtectedProdukRoute: ProtectedProdukRoute,
+  ProtectedRiwayatRoute: ProtectedRiwayatRoute,
   ProtectedProductsIdRoute: ProtectedProductsIdRoute,
 }
 
