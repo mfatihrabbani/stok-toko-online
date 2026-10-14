@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Plus, Search } from "lucide-react";
+import { NewProductFields } from "@/components/inventory/new-product-fields";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,22 +44,23 @@ export function StockEntryForm({
   initialProductId?: string;
   returnSearch: StockSearch;
 }) {
+  const [products, setProducts] = useState(demoProducts);
+  const [addingProduct, setAddingProduct] = useState(false);
   const [productId, setProductId] = useState(
-    initialProductId &&
-      demoProducts.some((item) => item.id === initialProductId)
+    initialProductId && products.some((item) => item.id === initialProductId)
       ? initialProductId
-      : (demoProducts[0]?.id ?? ""),
+      : (products[0]?.id ?? ""),
   );
   const [quantity, setQuantity] = useState("");
   const [productQuery, setProductQuery] = useState("");
-  const matches = filterProducts(demoProducts, {
+  const matches = filterProducts(products, {
     ...defaultProductFilters,
     query: productQuery,
   });
   function searchProducts(query: string) {
     setProductQuery(query);
     if (
-      !filterProducts(demoProducts, { ...defaultProductFilters, query }).some(
+      !filterProducts(products, { ...defaultProductFilters, query }).some(
         (item) => item.id === productId,
       )
     )
@@ -71,7 +73,7 @@ export function StockEntryForm({
   );
   const quantityRef = useRef<HTMLInputElement>(null);
   const productRef = useRef<HTMLSelectElement>(null);
-  const product = demoProducts.find((item) => item.id === productId);
+  const product = products.find((item) => item.id === productId);
   const amount = Number(quantity);
   const valid =
     Boolean(product) &&
@@ -81,6 +83,7 @@ export function StockEntryForm({
   const after = (product?.stock ?? 0) + (valid ? amount : 0);
   function review(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (addingProduct) return;
     const nextErrors: typeof errors = {};
     if (!product) nextErrors.product = "Pilih produk sebelum melanjutkan.";
     if (!quantity.trim())
@@ -195,6 +198,14 @@ export function StockEntryForm({
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setAddingProduct((current) => !current)}
+                  >
+                    <Plus data-icon="inline-start" aria-hidden="true" />
+                    Tambah produk baru
+                  </Button>
                   {errors.product && (
                     <FieldError id="entry-product-error">
                       {errors.product}
@@ -206,6 +217,19 @@ export function StockEntryForm({
                     </FieldDescription>
                   )}
                 </Field>
+                {addingProduct && (
+                  <NewProductFields
+                    products={products}
+                    onCancel={() => setAddingProduct(false)}
+                    onCreate={(created) => {
+                      setProducts((current) => [...current, created]);
+                      setProductId(created.id);
+                      setProductQuery("");
+                      setAddingProduct(false);
+                      setErrors({});
+                    }}
+                  />
+                )}
                 <Field
                   className="gap-2"
                   data-invalid={Boolean(errors.quantity)}
@@ -267,11 +291,26 @@ export function StockEntryForm({
                     Batal
                   </Link>
                 </Button>
-                <Button type="submit">
+                <Button
+                  type="submit"
+                  disabled={addingProduct}
+                  aria-describedby={
+                    addingProduct ? "entry-new-product-hint" : undefined
+                  }
+                >
                   Tinjau catatan{" "}
                   <ArrowRight data-icon="inline-end" aria-hidden="true" />
                 </Button>
               </div>
+              {addingProduct && (
+                <p
+                  id="entry-new-product-hint"
+                  className="text-xs text-muted-foreground"
+                >
+                  Gunakan produk baru atau batalkan penambahan sebelum meninjau
+                  catatan.
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>

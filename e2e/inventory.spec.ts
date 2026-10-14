@@ -187,6 +187,36 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
   await expect(page.getByLabel("Jumlah masuk", { exact: true })).toHaveValue(
     "10",
   );
+  await page
+    .getByRole("button", { name: "Tambah produk baru", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Gunakan produk", exact: true })
+    .click();
+  await expect(page.getByLabel("Nama produk", { exact: true })).toBeFocused();
+  await page.getByLabel("Nama produk", { exact: true }).fill("Magnet kulkas");
+  await page.getByLabel("SKU (opsional)", { exact: true }).fill("acc-001");
+  await page
+    .getByRole("button", { name: "Gunakan produk", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toHaveText(
+    "SKU sudah digunakan. Gunakan kode lain.",
+  );
+  await page.getByLabel("SKU (opsional)", { exact: true }).fill("MAG-001");
+  await page.getByLabel("Kategori (opsional)", { exact: true }).fill("Kado");
+  await page.getByLabel("Stok minimal", { exact: true }).fill("3");
+  await page
+    .getByRole("button", { name: "Gunakan produk", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Produk", { exact: true }).locator("option:checked"),
+  ).toContainText("Magnet kulkas");
+  await expect(page.getByLabel("Jumlah masuk", { exact: true })).toHaveValue(
+    "10",
+  );
+  await expect(
+    page.getByRole("complementary", { name: "Ringkasan barang masuk" }),
+  ).toContainText("10 unit");
   await page.getByRole("link", { name: "Batal", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(
