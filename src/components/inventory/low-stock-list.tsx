@@ -47,6 +47,10 @@ export function LowStockList({
                       minimal {formatNumber(product.minStock)}
                     </p>
                   </div>
+                  <p className="mt-3 text-sm text-warning">
+                    Perlu {formatNumber(product.minStock - product.stock)}{" "}
+                    {product.unit} lagi untuk mencapai batas aman.
+                  </p>
                 </div>
               </li>
             ))}
