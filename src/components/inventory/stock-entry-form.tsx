@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -65,6 +66,11 @@ export function StockEntryForm({
   }
   const [note, setNote] = useState("");
   const [reviewing, setReviewing] = useState(false);
+  const [errors, setErrors] = useState<{ product?: string; quantity?: string }>(
+    {},
+  );
+  const quantityRef = useRef<HTMLInputElement>(null);
+  const productRef = useRef<HTMLSelectElement>(null);
   const product = demoProducts.find((item) => item.id === productId);
   const amount = Number(quantity);
   const valid =
@@ -75,6 +81,20 @@ export function StockEntryForm({
   const after = (product?.stock ?? 0) + (valid ? amount : 0);
   function review(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const nextErrors: typeof errors = {};
+    if (!product) nextErrors.product = "Pilih produk sebelum melanjutkan.";
+    if (!quantity.trim())
+      nextErrors.quantity = "Masukkan jumlah barang yang diterima.";
+    else if (!Number.isSafeInteger(amount) || amount < 1)
+      nextErrors.quantity = "Gunakan bilangan bulat, minimal 1.";
+    else if (amount > 2147483647 - (product?.stock ?? 0))
+      nextErrors.quantity = `Jumlah terlalu besar. Maksimal ${formatNumber(2147483647 - (product?.stock ?? 0))} unit.`;
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) {
+      if (nextErrors.product) productRef.current?.focus();
+      else quantityRef.current?.focus();
+      return;
+    }
     if (valid) setReviewing(true);
   }
   return (
@@ -118,7 +138,7 @@ export function StockEntryForm({
             <CardTitle>Data barang masuk</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={review} className="flex flex-col gap-6">
+            <form onSubmit={review} noValidate className="flex flex-col gap-6">
               <FieldGroup className="gap-5">
                 <Field className="gap-2">
                   <FieldLabel htmlFor="entry-search">Cari produk</FieldLabel>
@@ -146,13 +166,24 @@ export function StockEntryForm({
                       : ""}
                   </FieldDescription>
                 </Field>
-                <Field className="gap-2">
+                <Field className="gap-2" data-invalid={Boolean(errors.product)}>
                   <FieldLabel htmlFor="entry-product">Produk</FieldLabel>
                   <NativeSelect
                     id="entry-product"
+                    ref={productRef}
+                    aria-invalid={Boolean(errors.product)}
+                    aria-describedby={
+                      errors.product ? "entry-product-error" : undefined
+                    }
                     name="product"
                     value={productId}
-                    onChange={(event) => setProductId(event.target.value)}
+                    onChange={(event) => {
+                      setProductId(event.target.value);
+                      setErrors((current) => ({
+                        ...current,
+                        product: undefined,
+                      }));
+                    }}
                     required
                   >
                     <NativeSelectOption value="" disabled>
@@ -164,16 +195,31 @@ export function StockEntryForm({
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
+                  {errors.product && (
+                    <FieldError id="entry-product-error">
+                      {errors.product}
+                    </FieldError>
+                  )}
                   {product && (
                     <FieldDescription>
                       {product.sku || "Tanpa SKU"} · {product.category}
                     </FieldDescription>
                   )}
                 </Field>
-                <Field className="gap-2">
+                <Field
+                  className="gap-2"
+                  data-invalid={Boolean(errors.quantity)}
+                >
                   <FieldLabel htmlFor="entry-quantity">Jumlah masuk</FieldLabel>
                   <Input
                     id="entry-quantity"
+                    ref={quantityRef}
+                    aria-invalid={Boolean(errors.quantity)}
+                    aria-describedby={
+                      errors.quantity
+                        ? "entry-quantity-error"
+                        : "entry-quantity-hint"
+                    }
                     name="quantity"
                     type="number"
                     inputMode="numeric"
@@ -181,10 +227,24 @@ export function StockEntryForm({
                     max={2147483647 - (product?.stock ?? 0)}
                     step={1}
                     value={quantity}
-                    onChange={(event) => setQuantity(event.target.value)}
+                    onChange={(event) => {
+                      setQuantity(event.target.value);
+                      setErrors((current) => ({
+                        ...current,
+                        quantity: undefined,
+                      }));
+                    }}
                     placeholder="Contoh: 10"
                     required
                   />
+                  <FieldDescription id="entry-quantity-hint">
+                    Gunakan bilangan bulat, minimal 1.
+                  </FieldDescription>
+                  {errors.quantity && (
+                    <FieldError id="entry-quantity-error">
+                      {errors.quantity}
+                    </FieldError>
+                  )}
                 </Field>
                 <Field className="gap-2">
                   <FieldLabel htmlFor="entry-note">

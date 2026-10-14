@@ -140,6 +140,21 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
     page.getByRole("heading", { name: "Barang masuk", exact: true }),
   ).toBeVisible();
   await page.getByLabel("Jumlah masuk", { exact: true }).fill("10");
+  for (const invalidQuantity of ["", "0", "1.5", "2147483647"]) {
+    await page
+      .getByLabel("Jumlah masuk", { exact: true })
+      .fill(invalidQuantity);
+    await page
+      .getByRole("button", { name: "Tinjau catatan", exact: true })
+      .click();
+    await expect(
+      page.getByLabel("Jumlah masuk", { exact: true }),
+    ).toHaveAttribute("aria-invalid", "true");
+    await expect(
+      page.getByLabel("Jumlah masuk", { exact: true }),
+    ).toBeFocused();
+    await expect(page.getByRole("alert")).toBeVisible();
+  }
   await page.goto("/products/3");
   await page.getByRole("link", { name: "Catat masuk", exact: true }).click();
   await expect(page.getByLabel("Produk", { exact: true })).toHaveValue("3");
