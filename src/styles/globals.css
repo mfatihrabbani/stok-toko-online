@@ -455,3 +455,27 @@
     min-height: 44px;
   }
 }
+[data-slot="dialog-close"] {
+  min-width: 40px;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+}
+[data-slot="dialog-content"] dd {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 780px) {
+  [data-slot="dialog-close"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="dialog-overlay"],
+  [data-slot="dialog-content"] {
+    animation: none;
+    transition: none;
+  }
+}

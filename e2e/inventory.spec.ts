@@ -181,7 +181,10 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
     .getByRole("button", { name: "Tinjau catatan", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Tinjau barang masuk", exact: true }),
+    page.getByRole("heading", {
+      name: "Konfirmasi perubahan stok",
+      exact: true,
+    }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Ubah catatan", exact: true }).click();
   await expect(page.getByLabel("Jumlah masuk", { exact: true })).toHaveValue(

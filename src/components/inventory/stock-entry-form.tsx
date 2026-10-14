@@ -1,15 +1,10 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Plus, Search } from "lucide-react";
+import { StockConfirmation } from "@/components/inventory/stock-confirmation";
 import { NewProductFields } from "@/components/inventory/new-product-fields";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -73,6 +68,7 @@ export function StockEntryForm({
   );
   const quantityRef = useRef<HTMLInputElement>(null);
   const productRef = useRef<HTMLSelectElement>(null);
+  const reviewRef = useRef<HTMLButtonElement>(null);
   const product = products.find((item) => item.id === productId);
   const amount = Number(quantity);
   const valid =
@@ -102,219 +98,180 @@ export function StockEntryForm({
   }
   return (
     <div className="stock-entry grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-      {reviewing && product ? (
-        <Card className="shadow-none">
-          <CardHeader>
-            <CardTitle>
-              <h2 className="text-xl">Tinjau barang masuk</h2>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="flex flex-col gap-4">
-              <div>
-                <dt className="text-xs text-muted-foreground">Produk</dt>
-                <dd className="mt-1 font-medium">{product.name}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">Jumlah masuk</dt>
-                <dd className="mt-1">
-                  {formatNumber(amount)} {product.unit}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">Catatan</dt>
-                <dd className="mt-1 break-words">
-                  {note.trim() || "Tanpa catatan"}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" onClick={() => setReviewing(false)}>
-              Ubah catatan
-            </Button>
-          </CardFooter>
-        </Card>
-      ) : (
-        <Card className="shadow-none">
-          <CardHeader className="sr-only">
-            <CardTitle>Data barang masuk</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={review} noValidate className="flex flex-col gap-6">
-              <FieldGroup className="gap-5">
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="entry-search">Cari produk</FieldLabel>
-                  <InputGroup>
-                    <InputGroupAddon>
-                      <Search aria-hidden="true" />
-                    </InputGroupAddon>
-                    <InputGroupInput
-                      id="entry-search"
-                      type="search"
-                      value={productQuery}
-                      onChange={(event) => searchProducts(event.target.value)}
-                      placeholder="Nama produk atau SKU..."
-                      maxLength={160}
-                    />
-                  </InputGroup>
-                  <FieldDescription
-                    role="status"
-                    className={productQuery ? undefined : "sr-only"}
-                  >
-                    {productQuery
-                      ? matches.length
-                        ? `${matches.length} produk cocok. Pilih produk di bawah.`
-                        : "Produk tidak ditemukan. Ubah pencarian."
-                      : ""}
-                  </FieldDescription>
-                </Field>
-                <Field className="gap-2" data-invalid={Boolean(errors.product)}>
-                  <FieldLabel htmlFor="entry-product">Produk</FieldLabel>
-                  <NativeSelect
-                    id="entry-product"
-                    ref={productRef}
-                    aria-invalid={Boolean(errors.product)}
-                    aria-describedby={
-                      errors.product ? "entry-product-error" : undefined
-                    }
-                    name="product"
-                    value={productId}
-                    onChange={(event) => {
-                      setProductId(event.target.value);
-                      setErrors((current) => ({
-                        ...current,
-                        product: undefined,
-                      }));
-                    }}
-                    required
-                  >
-                    <NativeSelectOption value="" disabled>
-                      Pilih produk
-                    </NativeSelectOption>
-                    {matches.map((item) => (
-                      <NativeSelectOption key={item.id} value={item.id}>
-                        {item.name} · {formatNumber(item.stock)} {item.unit}
-                      </NativeSelectOption>
-                    ))}
-                  </NativeSelect>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setAddingProduct((current) => !current)}
-                  >
-                    <Plus data-icon="inline-start" aria-hidden="true" />
-                    Tambah produk baru
-                  </Button>
-                  {errors.product && (
-                    <FieldError id="entry-product-error">
-                      {errors.product}
-                    </FieldError>
-                  )}
-                  {product && (
-                    <FieldDescription>
-                      {product.sku || "Tanpa SKU"} · {product.category}
-                    </FieldDescription>
-                  )}
-                </Field>
-                {addingProduct && (
-                  <NewProductFields
-                    products={products}
-                    onCancel={() => setAddingProduct(false)}
-                    onCreate={(created) => {
-                      setProducts((current) => [...current, created]);
-                      setProductId(created.id);
-                      setProductQuery("");
-                      setAddingProduct(false);
-                      setErrors({});
-                    }}
+      <Card className="shadow-none">
+        <CardHeader className="sr-only">
+          <CardTitle>Data barang masuk</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={review} noValidate className="flex flex-col gap-6">
+            <FieldGroup className="gap-5">
+              <Field className="gap-2">
+                <FieldLabel htmlFor="entry-search">Cari produk</FieldLabel>
+                <InputGroup>
+                  <InputGroupAddon>
+                    <Search aria-hidden="true" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="entry-search"
+                    type="search"
+                    value={productQuery}
+                    onChange={(event) => searchProducts(event.target.value)}
+                    placeholder="Nama produk atau SKU..."
+                    maxLength={160}
                   />
-                )}
-                <Field
-                  className="gap-2"
-                  data-invalid={Boolean(errors.quantity)}
+                </InputGroup>
+                <FieldDescription
+                  role="status"
+                  className={productQuery ? undefined : "sr-only"}
                 >
-                  <FieldLabel htmlFor="entry-quantity">Jumlah masuk</FieldLabel>
-                  <Input
-                    id="entry-quantity"
-                    ref={quantityRef}
-                    aria-invalid={Boolean(errors.quantity)}
-                    aria-describedby={
-                      errors.quantity
-                        ? "entry-quantity-error"
-                        : "entry-quantity-hint"
-                    }
-                    name="quantity"
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    max={2147483647 - (product?.stock ?? 0)}
-                    step={1}
-                    value={quantity}
-                    onChange={(event) => {
-                      setQuantity(event.target.value);
-                      setErrors((current) => ({
-                        ...current,
-                        quantity: undefined,
-                      }));
-                    }}
-                    placeholder="Contoh: 10"
-                    required
-                  />
-                  <FieldDescription id="entry-quantity-hint">
-                    Gunakan bilangan bulat, minimal 1.
-                  </FieldDescription>
-                  {errors.quantity && (
-                    <FieldError id="entry-quantity-error">
-                      {errors.quantity}
-                    </FieldError>
-                  )}
-                </Field>
-                <Field className="gap-2">
-                  <FieldLabel htmlFor="entry-note">
-                    Catatan (opsional)
-                  </FieldLabel>
-                  <Textarea
-                    id="entry-note"
-                    name="note"
-                    value={note}
-                    onChange={(event) => setNote(event.target.value)}
-                    maxLength={300}
-                    rows={3}
-                    placeholder="Contoh: restok dari pemasok"
-                  />
-                </Field>
-              </FieldGroup>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" asChild>
-                  <Link to="/app" search={returnSearch}>
-                    Batal
-                  </Link>
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={addingProduct}
+                  {productQuery
+                    ? matches.length
+                      ? `${matches.length} produk cocok. Pilih produk di bawah.`
+                      : "Produk tidak ditemukan. Ubah pencarian."
+                    : ""}
+                </FieldDescription>
+              </Field>
+              <Field className="gap-2" data-invalid={Boolean(errors.product)}>
+                <FieldLabel htmlFor="entry-product">Produk</FieldLabel>
+                <NativeSelect
+                  id="entry-product"
+                  ref={productRef}
+                  aria-invalid={Boolean(errors.product)}
                   aria-describedby={
-                    addingProduct ? "entry-new-product-hint" : undefined
+                    errors.product ? "entry-product-error" : undefined
                   }
+                  name="product"
+                  value={productId}
+                  onChange={(event) => {
+                    setProductId(event.target.value);
+                    setErrors((current) => ({
+                      ...current,
+                      product: undefined,
+                    }));
+                  }}
+                  required
                 >
-                  Tinjau catatan{" "}
-                  <ArrowRight data-icon="inline-end" aria-hidden="true" />
+                  <NativeSelectOption value="" disabled>
+                    Pilih produk
+                  </NativeSelectOption>
+                  {matches.map((item) => (
+                    <NativeSelectOption key={item.id} value={item.id}>
+                      {item.name} · {formatNumber(item.stock)} {item.unit}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelect>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setAddingProduct((current) => !current)}
+                >
+                  <Plus data-icon="inline-start" aria-hidden="true" />
+                  Tambah produk baru
                 </Button>
-              </div>
+                {errors.product && (
+                  <FieldError id="entry-product-error">
+                    {errors.product}
+                  </FieldError>
+                )}
+                {product && (
+                  <FieldDescription>
+                    {product.sku || "Tanpa SKU"} · {product.category}
+                  </FieldDescription>
+                )}
+              </Field>
               {addingProduct && (
-                <p
-                  id="entry-new-product-hint"
-                  className="text-xs text-muted-foreground"
-                >
-                  Gunakan produk baru atau batalkan penambahan sebelum meninjau
-                  catatan.
-                </p>
+                <NewProductFields
+                  products={products}
+                  onCancel={() => setAddingProduct(false)}
+                  onCreate={(created) => {
+                    setProducts((current) => [...current, created]);
+                    setProductId(created.id);
+                    setProductQuery("");
+                    setAddingProduct(false);
+                    setErrors({});
+                  }}
+                />
               )}
-            </form>
-          </CardContent>
-        </Card>
-      )}
+              <Field className="gap-2" data-invalid={Boolean(errors.quantity)}>
+                <FieldLabel htmlFor="entry-quantity">Jumlah masuk</FieldLabel>
+                <Input
+                  id="entry-quantity"
+                  ref={quantityRef}
+                  aria-invalid={Boolean(errors.quantity)}
+                  aria-describedby={
+                    errors.quantity
+                      ? "entry-quantity-error"
+                      : "entry-quantity-hint"
+                  }
+                  name="quantity"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={2147483647 - (product?.stock ?? 0)}
+                  step={1}
+                  value={quantity}
+                  onChange={(event) => {
+                    setQuantity(event.target.value);
+                    setErrors((current) => ({
+                      ...current,
+                      quantity: undefined,
+                    }));
+                  }}
+                  placeholder="Contoh: 10"
+                  required
+                />
+                <FieldDescription id="entry-quantity-hint">
+                  Gunakan bilangan bulat, minimal 1.
+                </FieldDescription>
+                {errors.quantity && (
+                  <FieldError id="entry-quantity-error">
+                    {errors.quantity}
+                  </FieldError>
+                )}
+              </Field>
+              <Field className="gap-2">
+                <FieldLabel htmlFor="entry-note">Catatan (opsional)</FieldLabel>
+                <Textarea
+                  id="entry-note"
+                  name="note"
+                  value={note}
+                  onChange={(event) => setNote(event.target.value)}
+                  maxLength={300}
+                  rows={3}
+                  placeholder="Contoh: restok dari pemasok"
+                />
+              </Field>
+            </FieldGroup>
+            <div className="flex flex-wrap gap-3">
+              <Button variant="outline" asChild>
+                <Link to="/app" search={returnSearch}>
+                  Batal
+                </Link>
+              </Button>
+              <Button
+                type="submit"
+                ref={reviewRef}
+                disabled={addingProduct}
+                aria-describedby={
+                  addingProduct ? "entry-new-product-hint" : undefined
+                }
+              >
+                Tinjau catatan{" "}
+                <ArrowRight data-icon="inline-end" aria-hidden="true" />
+              </Button>
+            </div>
+            {addingProduct && (
+              <p
+                id="entry-new-product-hint"
+                className="text-xs text-muted-foreground"
+              >
+                Gunakan produk baru atau batalkan penambahan sebelum meninjau
+                catatan.
+              </p>
+            )}
+          </form>
+        </CardContent>
+      </Card>
       <aside aria-label="Ringkasan barang masuk">
         <Card className="shadow-none">
           <CardHeader>
@@ -348,6 +305,14 @@ export function StockEntryForm({
           </CardContent>
         </Card>
       </aside>
+      <StockConfirmation
+        product={product}
+        quantity={amount}
+        note={note}
+        open={reviewing}
+        onOpenChange={setReviewing}
+        onCloseFocus={() => reviewRef.current?.focus()}
+      />
     </div>
   );
 }
