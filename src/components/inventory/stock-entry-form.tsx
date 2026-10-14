@@ -79,6 +79,11 @@ export function StockEntryForm({
   const reviewRef = useRef<HTMLButtonElement>(null);
   const product = products.find((item) => item.id === productId);
   const amount = Number(quantity);
+  const insufficient =
+    outgoing &&
+    Boolean(product) &&
+    Number.isSafeInteger(amount) &&
+    amount > (product?.stock ?? 0);
   const valid =
     Boolean(product) &&
     Number.isSafeInteger(amount) &&
@@ -263,11 +268,13 @@ export function StockEntryForm({
                 <Input
                   id="entry-quantity"
                   ref={quantityRef}
-                  aria-invalid={Boolean(errors.quantity)}
+                  aria-invalid={Boolean(errors.quantity) || insufficient}
                   aria-describedby={
-                    errors.quantity
-                      ? "entry-quantity-error"
-                      : "entry-quantity-hint"
+                    insufficient
+                      ? "entry-stock-warning"
+                      : errors.quantity
+                        ? "entry-quantity-error"
+                        : "entry-quantity-hint"
                   }
                   name="quantity"
                   type="number"
@@ -300,6 +307,22 @@ export function StockEntryForm({
                     {errors.quantity}
                   </FieldError>
                 )}
+                {insufficient && (
+                  <p
+                    id="entry-stock-warning"
+                    role="alert"
+                    className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                  >
+                    Stok tidak cukup. Tersedia{" "}
+                    {formatNumber(product?.stock ?? 0)} unit; kurangi jumlah
+                    keluar sebelum menyimpan.
+                  </p>
+                )}
+                {outgoing && product?.stock === 0 && (
+                  <p role="status" className="text-sm text-destructive">
+                    Produk ini habis. Catat barang masuk terlebih dahulu.
+                  </p>
+                )}
               </Field>
               <Field className="gap-2">
                 <FieldLabel htmlFor="entry-note">Catatan (opsional)</FieldLabel>
@@ -327,7 +350,11 @@ export function StockEntryForm({
               <Button
                 type="submit"
                 ref={reviewRef}
-                disabled={addingProduct}
+                disabled={
+                  addingProduct ||
+                  insufficient ||
+                  (outgoing && product?.stock === 0)
+                }
                 aria-describedby={
                   addingProduct ? "entry-new-product-hint" : undefined
                 }
