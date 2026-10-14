@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   check,
   index,
+  foreignKey,
   integer,
   pgTable,
   text,
@@ -12,6 +13,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { user } from "./user";
+import { categories } from "./categories";
 
 export const products = pgTable(
   "products",
@@ -25,6 +27,8 @@ export const products = pgTable(
     category: varchar("category", { length: 80 })
       .default("Tanpa kategori")
       .notNull(),
+    categoryId: uuid("category_id"),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
     stock: integer("stock").default(0).notNull(),
     minStock: integer("min_stock").default(0).notNull(),
     unit: varchar("unit", { length: 30 }).default("unit").notNull(),
@@ -37,6 +41,11 @@ export const products = pgTable(
       .notNull(),
   },
   (table) => [
+    foreignKey({
+      columns: [table.categoryId, table.userId],
+      foreignColumns: [categories.id, categories.userId],
+      name: "products_owned_category_fk",
+    }).onDelete("restrict"),
     check("products_stock_nonnegative", sql`${table.stock} >= 0`),
     check("products_min_stock_nonnegative", sql`${table.minStock} >= 0`),
     check("products_name_nonempty", sql`length(trim(${table.name})) > 0`),

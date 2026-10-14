@@ -6,3 +6,4 @@ export * from "./verification";
 export * from "./notes";
 export * from "./products";
 export * from "./stock-movements";
+export * from "./categories";
