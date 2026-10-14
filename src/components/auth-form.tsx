@@ -1,11 +1,18 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { siteConfig } from "@/config/site";
+import { signInSchema, signUpSchema } from "@/validators/auth";
 
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const signingUp = mode === "sign-up";
@@ -13,33 +20,61 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const navigate = useNavigate();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-
+  const [fields, setFields] = useState<Record<string, string>>({});
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const clear = (field: string) =>
+    setFields((current) => ({ ...current, [field]: "" }));
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
-    const data = new FormData(event.currentTarget);
-    setPending(true);
+    const form = new FormData(event.currentTarget);
+    const credentials = {
+      email: String(form.get("email") || "").trim(),
+      password: String(form.get("password") || ""),
+    };
+    const input = signingUp
+      ? { ...credentials, name: String(form.get("name") || "").trim() }
+      : credentials;
+    const validated = (signingUp ? signUpSchema : signInSchema).safeParse(
+      input,
+    );
     setError("");
+    if (!validated.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of validated.error.issues) {
+        const field = String(issue.path[0]);
+        if (!errors[field]) errors[field] = issue.message;
+      }
+      setFields(errors);
+      (errors.name
+        ? nameRef
+        : errors.email
+          ? emailRef
+          : passwordRef
+      ).current?.focus();
+      return;
+    }
+    setFields({});
+    setPending(true);
     try {
-      const credentials = {
-        email: String(data.get("email")).trim(),
-        password: String(data.get("password")),
-      };
       const result = signingUp
         ? await authClient.signUp.email({
             ...credentials,
-            name: String(data.get("name")).trim(),
+            name: String(form.get("name") || "").trim(),
           })
         : await authClient.signIn.email(credentials);
       if (result.error) {
         setError(
-          signingUp
-            ? "Akun belum bisa dibuat. Periksa isian atau masuk bila sudah terdaftar."
-            : "Belum berhasil masuk. Periksa email dan kata sandi Anda.",
+          result.error.status === 429
+            ? "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi."
+            : signingUp
+              ? "Akun belum bisa dibuat. Periksa isian atau masuk bila sudah terdaftar."
+              : "Belum berhasil masuk. Periksa email dan kata sandi Anda.",
         );
         return;
       }
-      // Re-run route guards with the new cookie, then move to the app.
       await router.invalidate();
       await navigate({ to: siteConfig.homePath, replace: true });
     } catch {
@@ -48,7 +83,6 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       setPending(false);
     }
   }
-
   return (
     <div className="w-full max-w-sm">
       <p className="mb-3 text-sm font-medium text-primary">
@@ -64,83 +98,114 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       </p>
       <form
         onSubmit={onSubmit}
-        className="mt-8 space-y-5"
+        noValidate
+        className="stock-entry mt-8"
         aria-busy={pending}
-        aria-describedby={error ? "auth-error" : undefined}
       >
-        <fieldset disabled={pending} className="space-y-5">
+        <fieldset disabled={pending}>
           <legend className="sr-only">
             {signingUp ? "Data akun toko" : "Data untuk masuk"}
           </legend>
-          {signingUp && (
-            <div className="space-y-2">
-              <Label htmlFor="name">Nama pemilik atau toko</Label>
-              <Input
-                id="name"
-                name="name"
-                autoComplete="name"
-                placeholder="Contoh: Toko Sinar"
-                required
-                minLength={1}
-                maxLength={100}
-                pattern=".*\S.*"
-              />
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="nama@contoh.com"
-              required
-              maxLength={254}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Kata sandi</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete={signingUp ? "new-password" : "current-password"}
-              required
-              minLength={8}
-              maxLength={128}
-              aria-describedby={signingUp ? "password-hint" : undefined}
-            />
+          <FieldGroup className="gap-5">
             {signingUp && (
-              <p id="password-hint" className="text-sm text-muted-foreground">
-                Gunakan 8–128 karakter. Simpan kata sandi agar bisa masuk
-                kembali.
+              <Field data-invalid={Boolean(fields.name)}>
+                <FieldLabel htmlFor="name">Nama pemilik atau toko</FieldLabel>
+                <Input
+                  ref={nameRef}
+                  id="name"
+                  name="name"
+                  autoComplete="name"
+                  placeholder="Contoh: Toko Sinar"
+                  required
+                  maxLength={100}
+                  onChange={() => clear("name")}
+                  aria-invalid={Boolean(fields.name)}
+                  aria-describedby={fields.name ? "name-error" : undefined}
+                />
+                {fields.name && (
+                  <FieldError id="name-error">{fields.name}</FieldError>
+                )}
+              </Field>
+            )}
+            <Field data-invalid={Boolean(fields.email)}>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                ref={emailRef}
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="nama@contoh.com"
+                required
+                maxLength={254}
+                onChange={() => clear("email")}
+                aria-invalid={Boolean(fields.email)}
+                aria-describedby={fields.email ? "email-error" : undefined}
+              />
+              {fields.email && (
+                <FieldError id="email-error">{fields.email}</FieldError>
+              )}
+            </Field>
+            <Field data-invalid={Boolean(fields.password)}>
+              <FieldLabel htmlFor="password">Kata sandi</FieldLabel>
+              <Input
+                ref={passwordRef}
+                id="password"
+                name="password"
+                type="password"
+                autoComplete={signingUp ? "new-password" : "current-password"}
+                required
+                minLength={8}
+                maxLength={128}
+                onChange={() => clear("password")}
+                aria-invalid={Boolean(fields.password)}
+                aria-describedby={
+                  fields.password
+                    ? "password-error"
+                    : signingUp
+                      ? "password-hint"
+                      : undefined
+                }
+              />
+              {signingUp && (
+                <FieldDescription id="password-hint">
+                  Gunakan 8–128 karakter.
+                </FieldDescription>
+              )}
+              {fields.password && (
+                <FieldError id="password-error">{fields.password}</FieldError>
+              )}
+            </Field>
+            {error && (
+              <p
+                role="alert"
+                className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm leading-6 text-destructive"
+              >
+                {error}
               </p>
             )}
-          </div>
-          {error && (
-            <p
-              id="auth-error"
-              role="alert"
-              className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm leading-6 text-destructive"
+            <Button
+              className="w-full"
+              type="submit"
+              size="lg"
+              disabled={pending}
             >
-              {error}
-            </p>
-          )}
-          <Button className="w-full" type="submit" size="lg" disabled={pending}>
-            {pending ? (
-              <LoaderCircle
-                className="animate-spin motion-reduce:animate-none"
-                aria-hidden="true"
-              />
-            ) : null}
-            {pending
-              ? "Mohon tunggu..."
-              : signingUp
-                ? "Daftar akun toko"
-                : "Masuk"}
-            {!pending && <ArrowRight aria-hidden="true" />}
-          </Button>
+              {pending && (
+                <LoaderCircle
+                  className="animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              )}
+              {pending
+                ? "Mohon tunggu..."
+                : signingUp
+                  ? "Daftar akun toko"
+                  : "Masuk"}
+              {!pending && (
+                <ArrowRight data-icon="inline-end" aria-hidden="true" />
+              )}
+            </Button>
+          </FieldGroup>
         </fieldset>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
