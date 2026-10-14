@@ -423,6 +423,15 @@
 .stock-entry [data-slot="native-select-wrapper"] {
   width: 100%;
 }
+.stock-entry > *,
+.stock-entry [data-slot="card-content"],
+.stock-entry [data-slot="field"] {
+  min-width: 0;
+}
+.stock-entry [role="status"],
+.stock-entry [role="alert"] {
+  overflow-wrap: anywhere;
+}
 .stock-entry [data-slot="input"],
 .stock-entry [data-slot="native-select"] {
   min-height: 42px;
@@ -453,6 +462,10 @@
   .stock-entry [data-slot="input"],
   .stock-entry [data-slot="native-select"] {
     min-height: 44px;
+  }
+  .stock-entry [data-slot="button"] {
+    min-height: 44px;
+    white-space: normal;
   }
 }
 [data-slot="dialog-close"] {
