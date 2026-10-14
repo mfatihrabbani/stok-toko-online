@@ -14,11 +14,13 @@ export function ProductEditor({
   onSave,
   onCancel,
   initialProduct,
+  categories,
 }: {
   products: Product[];
   onSave: (product: Product) => void;
   onCancel: () => void;
   initialProduct?: Product;
+  categories?: string[];
 }) {
   const [stock, setStock] = useState("0");
   const [error, setError] = useState("");
@@ -54,6 +56,7 @@ export function ProductEditor({
       <NewProductFields
         products={products}
         initialProduct={initialProduct}
+        categories={categories}
         submitLabel={initialProduct ? "Simpan perubahan" : "Simpan produk"}
         onCancel={onCancel}
         onCreate={(created) => {

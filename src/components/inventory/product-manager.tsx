@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { StockStatus } from "@/components/inventory/stock-status";
 import { ProductEditor } from "@/components/inventory/product-editor";
+import { CategoryManager } from "@/components/inventory/category-manager";
+import { StockFilters } from "@/components/inventory/stock-filters";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,10 +24,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { demoProducts, formatNumber, type Product } from "@/lib/inventory";
+import {
+  defaultProductFilters,
+  demoProducts,
+  filterProducts,
+  formatNumber,
+  type Product,
+} from "@/lib/inventory";
 
 export function ProductManager() {
   const [products, setProducts] = useState<Product[]>(demoProducts);
+  const [filters, setFilters] = useState(defaultProductFilters);
+  const [extraCategories, setExtraCategories] = useState<string[]>([]);
+  const categories = [
+    ...new Set([...extraCategories, ...products.map((item) => item.category)]),
+  ].sort();
+  const visible = filterProducts(products, filters);
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
   const [editing, setEditing] = useState<Product>();
@@ -57,6 +71,7 @@ export function ProductManager() {
             products={products}
             key={editing?.id ?? "new"}
             initialProduct={editing}
+            categories={categories}
             onCancel={closeEditor}
             onSave={(product) => {
               setProducts((current) =>
@@ -126,6 +141,24 @@ export function ProductManager() {
       </header>
       <Card className="shadow-none">
         <CardHeader>
+          <CategoryManager
+            categories={categories}
+            onChange={(oldName, name) => {
+              setExtraCategories((current) => [
+                ...current.filter((item) => item !== oldName),
+                ...(name ? [name] : []),
+              ]);
+              if (oldName)
+                setProducts((current) =>
+                  current.map((item) =>
+                    item.category === oldName
+                      ? { ...item, category: name || "Tanpa kategori" }
+                      : item,
+                  ),
+                );
+              setFilters(defaultProductFilters);
+            }}
+          />
           <Button className="w-fit self-end" onClick={() => setCreating(true)}>
             <Plus data-icon="inline-start" aria-hidden="true" />
             Tambah produk
@@ -137,6 +170,17 @@ export function ProductManager() {
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             Data contoh untuk pratinjau pengelolaan produk.
+          </p>
+          <StockFilters
+            products={products}
+            filters={filters}
+            onChange={(changes) =>
+              setFilters((current) => ({ ...current, ...changes }))
+            }
+            onReset={() => setFilters(defaultProductFilters)}
+          />
+          <p role="status" className="text-xs text-muted-foreground">
+            {visible.length} produk ditemukan
           </p>
         </CardHeader>
         <CardContent className="px-0">
@@ -155,7 +199,19 @@ export function ProductManager() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {!visible.length && (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="col-span-2 py-12 text-center text-muted-foreground"
+                  >
+                    {products.length
+                      ? "Produk tidak ditemukan. Ubah pencarian atau reset filter."
+                      : "Belum ada produk. Tambahkan produk pertama Anda."}
+                  </TableCell>
+                </TableRow>
+              )}
+              {visible.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="product-cell">
                     <strong className="block">{product.name}</strong>

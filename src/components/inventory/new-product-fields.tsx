@@ -17,12 +17,14 @@ export function NewProductFields({
   onCancel,
   initialProduct,
   submitLabel = "Gunakan produk",
+  categories = [],
 }: {
   products: Product[];
   onCreate: (product: Product) => void;
   onCancel: () => void;
   initialProduct?: Product;
   submitLabel?: string;
+  categories?: string[];
 }) {
   const [name, setName] = useState(initialProduct?.name ?? "");
   const [sku, setSku] = useState(initialProduct?.sku ?? "");
@@ -120,11 +122,14 @@ export function NewProductFields({
             maxLength={80}
           />
           <datalist id="new-product-categories">
-            {[...new Set(products.map((product) => product.category))].map(
-              (item) => (
-                <option key={item} value={item} />
-              ),
-            )}
+            {[
+              ...new Set([
+                ...categories,
+                ...products.map((product) => product.category),
+              ]),
+            ].map((item) => (
+              <option key={item} value={item} />
+            ))}
           </datalist>
         </Field>
         <Field data-invalid={Boolean(errors.minimum)} className="gap-2">
