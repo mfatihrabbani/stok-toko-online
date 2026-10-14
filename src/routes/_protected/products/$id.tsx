@@ -18,24 +18,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { StockStatus } from "@/components/inventory/stock-status";
-import { demoProducts, formatNumber, stockStatus } from "@/lib/inventory";
+import { formatNumber, stockStatus } from "@/lib/inventory";
+import { getProductFn } from "@/lib/inventory-queries";
+import { inventoryIdSchema } from "@/validators/inventory";
 import { siteConfig } from "@/config/site";
 import { parseStockSearch } from "@/lib/stock-search";
 
 export const Route = createFileRoute("/_protected/products/$id")({
   validateSearch: parseStockSearch,
   head: () => ({ meta: [{ title: `Detail produk | ${siteConfig.name}` }] }),
-  loader: ({ params }) => {
-    const product = demoProducts.find((item) => item.id === params.id);
-    if (!product) throw notFound();
-    return { product };
+  loader: async ({ params }) => {
+    if (!inventoryIdSchema.safeParse(params.id).success) throw notFound();
+    const detail = await getProductFn({ data: params.id });
+    if (!detail) throw notFound();
+    return detail;
   },
   component: ProductDetailPage,
   notFoundComponent: ProductNotFound,
 });
 
 function ProductDetailPage() {
-  const { product } = Route.useLoaderData();
+  const { product, movements } = Route.useLoaderData();
   const search = Route.useSearch();
   const status = stockStatus(product);
   return (
@@ -122,6 +125,52 @@ function ProductDetailPage() {
           </CardContent>
         </Card>
       </div>
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle>
+            <h2 className="text-xl">Pergerakan terakhir</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {movements.length ? (
+            <ul className="divide-y">
+              {movements.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex flex-wrap justify-between gap-3 py-4"
+                >
+                  <div>
+                    <strong>
+                      {item.direction === "in"
+                        ? "Barang masuk"
+                        : "Barang keluar"}{" "}
+                      · {formatNumber(item.quantity)} unit
+                    </strong>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {item.note || "Tanpa catatan"}
+                    </p>
+                  </div>
+                  <div className="text-right text-xs text-muted-foreground">
+                    <p>
+                      {formatNumber(item.stockBefore)} →{" "}
+                      {formatNumber(item.stockAfter)} unit
+                    </p>
+                    <time dateTime={item.createdAt}>
+                      {new Date(item.createdAt).toLocaleString("id-ID", {
+                        timeZone: "Asia/Jakarta",
+                      })}
+                    </time>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Belum ada pergerakan stok. Catat barang masuk untuk memulai.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

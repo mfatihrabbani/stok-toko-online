@@ -8,13 +8,13 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   ChevronRight,
-  FlaskConical,
   LayoutDashboard,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { getInventoryFn } from "@/lib/inventory-queries";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context }) => {
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_protected")({
     return { session: context.session };
   },
   component: ProtectedLayout,
+  loader: () => getInventoryFn(),
 });
 
 function ProtectedLayout() {
@@ -73,8 +74,7 @@ function ProtectedLayout() {
             Barang keluar
           </Link>
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
-            <FlaskConical className="size-4" aria-hidden="true" />
-            Data contoh
+            Persediaan toko Anda
           </p>
           <SignOutButton />
         </div>
@@ -86,14 +86,12 @@ function ProtectedLayout() {
             <ChevronRight className="size-4" aria-hidden="true" />
             <span className="text-foreground">Persediaan</span>
           </div>
-          <Badge variant="outline">Data contoh</Badge>
+          <Badge variant="outline">Toko online</Badge>
         </header>
         <main id="main-content" className="stock-main">
           <Outlet />
         </main>
-        <footer className="stock-footer">
-          Data contoh · Perubahan belum disimpan ke persediaan toko.
-        </footer>
+        <footer className="stock-footer">stok. · Persediaan toko Anda</footer>
       </div>
     </div>
   );

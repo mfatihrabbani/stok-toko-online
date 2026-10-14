@@ -23,6 +23,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
 import { Route as ApiProductsIndexRouteImport } from './routes/api/products/index'
+import { Route as ApiProductsIdRouteImport } from './routes/api/products/$id'
 import { Route as ApiProductsSummaryRouteImport } from './routes/api/products/summary'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
@@ -95,6 +96,11 @@ const ApiProductsIndexRoute = ApiProductsIndexRouteImport.update({
   path: '/api/products/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProductsIdRoute = ApiProductsIdRouteImport.update({
+  id: '/api/products/$id',
+  path: '/api/products/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProductsSummaryRoute = ApiProductsSummaryRouteImport.update({
   id: '/api/products/summary',
   path: '/api/products/summary',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/products': typeof ApiProductsIndexRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/_protected/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
+  '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/products/$id'
     | '/api/products/summary'
     | '/api/notes/'
     | '/api/products/'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/products/$id'
     | '/api/products/summary'
     | '/api/notes'
     | '/api/products'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/_protected/products/$id'
     | '/api/auth/$'
     | '/api/notes/$id'
+    | '/api/products/$id'
     | '/api/products/summary'
     | '/api/notes/'
     | '/api/products/'
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
+  ApiProductsIdRoute: typeof ApiProductsIdRoute
   ApiProductsSummaryRoute: typeof ApiProductsSummaryRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiProductsIndexRoute: typeof ApiProductsIndexRoute
@@ -334,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProductsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/products/$id': {
+      id: '/api/products/$id'
+      path: '/api/products/$id'
+      fullPath: '/api/products/$id'
+      preLoaderRoute: typeof ApiProductsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/products/summary': {
       id: '/api/products/summary'
       path: '/api/products/summary'
@@ -396,6 +416,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
+  ApiProductsIdRoute: ApiProductsIdRoute,
   ApiProductsSummaryRoute: ApiProductsSummaryRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiProductsIndexRoute: ApiProductsIndexRoute,

@@ -1,6 +1,7 @@
-import { and, asc, eq, gt, lt, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db/index.server";
 import { products } from "@/db/schema/products";
+import { stockMovements } from "@/db/schema/stock-movements";
 import type { ListProductsInput } from "@/validators/inventory";
 
 export const productFields = {
@@ -13,6 +14,50 @@ export const productFields = {
   unit: products.unit,
   updatedAt: products.updatedAt,
 };
+
+export async function getInventory(userId: string) {
+  const rows = await db
+    .select(productFields)
+    .from(products)
+    .where(eq(products.userId, userId))
+    .orderBy(asc(products.name), asc(products.id));
+  return rows.map((row) => ({
+    ...row,
+    updatedAt: row.updatedAt.toISOString(),
+  }));
+}
+
+export async function getProduct(userId: string, id: string) {
+  const [product] = await db
+    .select(productFields)
+    .from(products)
+    .where(and(eq(products.id, id), eq(products.userId, userId)))
+    .limit(1);
+  if (!product) return null;
+  const movements = await db
+    .select({
+      id: stockMovements.id,
+      direction: stockMovements.direction,
+      quantity: stockMovements.quantity,
+      note: stockMovements.note,
+      stockBefore: stockMovements.stockBefore,
+      stockAfter: stockMovements.stockAfter,
+      createdAt: stockMovements.createdAt,
+    })
+    .from(stockMovements)
+    .where(
+      and(eq(stockMovements.productId, id), eq(stockMovements.userId, userId)),
+    )
+    .orderBy(desc(stockMovements.createdAt), desc(stockMovements.id))
+    .limit(20);
+  return {
+    product: { ...product, updatedAt: product.updatedAt.toISOString() },
+    movements: movements.map((row) => ({
+      ...row,
+      createdAt: row.createdAt.toISOString(),
+    })),
+  };
+}
 
 export async function getStockSummary(userId: string) {
   const [summary] = await db

@@ -12,11 +12,8 @@ import {
 import { StockTable } from "@/components/inventory/stock-table";
 import { StockFilters } from "@/components/inventory/stock-filters";
 import { StockSummary } from "@/components/inventory/stock-summary";
-import {
-  defaultProductFilters,
-  demoProducts,
-  filterProducts,
-} from "@/lib/inventory";
+import { defaultProductFilters, filterProducts } from "@/lib/inventory";
+import { useInventory } from "@/lib/use-inventory";
 import { siteConfig } from "@/config/site";
 import {
   parseStockSearch,
@@ -32,6 +29,7 @@ export const Route = createFileRoute("/_protected/app")({
 });
 
 function StockPage() {
+  const { products: inventory } = useInventory();
   const search = Route.useSearch();
   const filters = stockFiltersFromSearch(search);
   const navigate = Route.useNavigate();
@@ -42,7 +40,7 @@ function StockPage() {
       resetScroll: false,
     });
   };
-  const products = filterProducts(demoProducts, filters);
+  const products = filterProducts(inventory, filters);
   const active =
     Boolean(filters.query.trim()) ||
     filters.category !== "all" ||
@@ -72,17 +70,16 @@ function StockPage() {
           </Button>
         </div>
       </header>
-      <StockSummary products={demoProducts} />
+      <StockSummary products={inventory} />
       <Card className="gap-0 overflow-hidden shadow-none">
         <CardHeader className="pb-5">
           <CardTitle>
             <h2 className="flex items-center gap-2 text-xl">
-              Daftar produk{" "}
-              <Badge variant="outline">{demoProducts.length}</Badge>
+              Daftar produk <Badge variant="outline">{inventory.length}</Badge>
             </h2>
           </CardTitle>
           <StockFilters
-            products={demoProducts}
+            products={inventory}
             filters={filters}
             onChange={update}
             onReset={reset}
@@ -105,7 +102,7 @@ function StockPage() {
         </CardContent>
         <CardFooter className="border-t pt-4 text-xs text-muted-foreground">
           <span role="status">
-            Menampilkan {products.length} dari {demoProducts.length} produk
+            Menampilkan {products.length} dari {inventory.length} produk
           </span>
         </CardFooter>
       </Card>
