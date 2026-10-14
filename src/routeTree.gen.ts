@@ -37,6 +37,7 @@ import { Route as ApiStockIncomingRouteImport } from './routes/api/stock/incomin
 import { Route as ApiStockOutgoingRouteImport } from './routes/api/stock/outgoing'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
+import { Route as ApiProductsIdHandledRouteImport } from './routes/api/products/$id/handled'
 import { Route as ApiStockMovementsIndexRouteImport } from './routes/api/stock/movements/index'
 import { Route as ApiStockMovementsIdRouteImport } from './routes/api/stock/movements/$id'
 
@@ -178,6 +179,11 @@ const ApiAdminNotesIdRoute = ApiAdminNotesIdRouteImport.update({
   path: '/api/admin/notes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProductsIdHandledRoute = ApiProductsIdHandledRouteImport.update({
+  id: '/handled',
+  path: '/handled',
+  getParentRoute: () => ApiProductsIdRoute,
+} as any)
 const ApiStockMovementsIndexRoute = ApiStockMovementsIndexRouteImport.update({
   id: '/api/stock/movements/',
   path: '/api/stock/movements/',
@@ -206,7 +212,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
-  '/api/products/$id': typeof ApiProductsIdRoute
+  '/api/products/$id': typeof ApiProductsIdRouteWithChildren
   '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
@@ -215,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/products/$id/handled': typeof ApiProductsIdHandledRoute
   '/api/stock/movements/$id': typeof ApiStockMovementsIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
   '/api/stock/movements/': typeof ApiStockMovementsIndexRoute
@@ -236,7 +243,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
-  '/api/products/$id': typeof ApiProductsIdRoute
+  '/api/products/$id': typeof ApiProductsIdRouteWithChildren
   '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/products': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/products/$id/handled': typeof ApiProductsIdHandledRoute
   '/api/stock/movements/$id': typeof ApiStockMovementsIdRoute
   '/api/admin/notes': typeof ApiAdminNotesIndexRoute
   '/api/stock/movements': typeof ApiStockMovementsIndexRoute
@@ -269,7 +277,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
-  '/api/products/$id': typeof ApiProductsIdRoute
+  '/api/products/$id': typeof ApiProductsIdRouteWithChildren
   '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/products/$id/handled': typeof ApiProductsIdHandledRoute
   '/api/stock/movements/$id': typeof ApiStockMovementsIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
   '/api/stock/movements/': typeof ApiStockMovementsIndexRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
+    | '/api/products/$id/handled'
     | '/api/stock/movements/$id'
     | '/api/admin/notes/'
     | '/api/stock/movements/'
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/api/notes'
     | '/api/products'
     | '/api/admin/notes/$id'
+    | '/api/products/$id/handled'
     | '/api/stock/movements/$id'
     | '/api/admin/notes'
     | '/api/stock/movements'
@@ -372,6 +383,7 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
+    | '/api/products/$id/handled'
     | '/api/stock/movements/$id'
     | '/api/admin/notes/'
     | '/api/stock/movements/'
@@ -384,7 +396,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
-  ApiProductsIdRoute: typeof ApiProductsIdRoute
+  ApiProductsIdRoute: typeof ApiProductsIdRouteWithChildren
   ApiProductsLowStockRoute: typeof ApiProductsLowStockRoute
   ApiProductsSummaryRoute: typeof ApiProductsSummaryRoute
   ApiStockIncomingRoute: typeof ApiStockIncomingRoute
@@ -596,6 +608,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminNotesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/products/$id/handled': {
+      id: '/api/products/$id/handled'
+      path: '/handled'
+      fullPath: '/api/products/$id/handled'
+      preLoaderRoute: typeof ApiProductsIdHandledRouteImport
+      parentRoute: typeof ApiProductsIdRoute
+    }
     '/api/stock/movements/': {
       id: '/api/stock/movements/'
       path: '/api/stock/movements'
@@ -655,6 +674,18 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
   ProtectedRouteChildren,
 )
 
+interface ApiProductsIdRouteChildren {
+  ApiProductsIdHandledRoute: typeof ApiProductsIdHandledRoute
+}
+
+const ApiProductsIdRouteChildren: ApiProductsIdRouteChildren = {
+  ApiProductsIdHandledRoute: ApiProductsIdHandledRoute,
+}
+
+const ApiProductsIdRouteWithChildren = ApiProductsIdRoute._addFileChildren(
+  ApiProductsIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
@@ -662,7 +693,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
-  ApiProductsIdRoute: ApiProductsIdRoute,
+  ApiProductsIdRoute: ApiProductsIdRouteWithChildren,
   ApiProductsLowStockRoute: ApiProductsLowStockRoute,
   ApiProductsSummaryRoute: ApiProductsSummaryRoute,
   ApiStockIncomingRoute: ApiStockIncomingRoute,

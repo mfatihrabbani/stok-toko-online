@@ -137,6 +137,34 @@ function databaseCode(error: unknown): string | undefined {
 function activeOwner(userId: string) {
   return and(eq(products.userId, userId), isNull(products.archivedAt));
 }
+export async function handleLowStock(userId: string, id: string) {
+  const [row] = await db
+    .update(products)
+    .set({
+      restockHandledAt: sql`coalesce(${products.restockHandledAt}, now())`,
+    })
+    .where(
+      and(
+        eq(products.id, id),
+        activeOwner(userId),
+        lt(products.stock, products.minStock),
+      ),
+    )
+    .returning(productFields);
+  if (!row) {
+    const [owned] = await db
+      .select({ id: products.id })
+      .from(products)
+      .where(and(eq(products.id, id), activeOwner(userId)));
+    if (!owned)
+      throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
+    throw new InventoryError(
+      "INVALID_STOCK",
+      "Stok produk sudah aman. Peringatan tidak perlu ditandai.",
+    );
+  }
+  return { ...row, updatedAt: row.updatedAt.toISOString() };
+}
 type InventoryTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 async function resolveCategory(
   tx: InventoryTransaction,

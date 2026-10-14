@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const inventoryIdSchema = z.string().uuid();
+export const handleStockSchema = z.object({}).strict();
 export const lowStockQuerySchema = z
   .object({
     status: z.enum(["active", "handled", "all"]).default("active"),
