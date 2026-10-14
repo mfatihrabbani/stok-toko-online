@@ -2,12 +2,13 @@ import { ZodError } from "zod";
 import { auth } from "@/lib/auth.server";
 import { ApiError, readJson } from "@/lib/api.server";
 import { env } from "@/lib/env.server";
-import { signUpSchema } from "@/validators/auth";
+import { signInSchema, signUpSchema } from "@/validators/auth";
 
 export async function handleAuthRequest(request: Request) {
+  const path = new URL(request.url).pathname;
   if (
     request.method === "POST" &&
-    new URL(request.url).pathname === "/api/auth/sign-up/email"
+    ["/api/auth/sign-up/email", "/api/auth/sign-in/email"].includes(path)
   ) {
     try {
       if (
@@ -19,16 +20,15 @@ export async function handleAuthRequest(request: Request) {
           "FORBIDDEN_ORIGIN",
           "Gunakan form pada aplikasi toko.",
         );
-      const body = await readJson(request);
+      const body = await readJson(request.clone());
       const record =
         body && typeof body === "object" && !Array.isArray(body)
           ? (body as Record<string, unknown>)
           : {};
-      const input = signUpSchema.parse({
-        name: record.name,
-        email: record.email,
-        password: record.password,
-      });
+      const credentials = { email: record.email, password: record.password };
+      const input = path.endsWith("sign-up/email")
+        ? signUpSchema.parse({ ...credentials, name: record.name })
+        : signInSchema.parse(credentials);
       request = new Request(request, {
         body: JSON.stringify({ ...record, ...input }),
       });

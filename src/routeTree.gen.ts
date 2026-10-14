@@ -17,6 +17,7 @@ import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-pass
 import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as ProtectedAdminRouteImport } from './routes/_protected/admin'
+import { Route as ProtectedAkunRouteImport } from './routes/_protected/akun'
 import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
 import { Route as ProtectedBarangKeluarRouteImport } from './routes/_protected/barang-keluar'
 import { Route as ProtectedBarangMasukRouteImport } from './routes/_protected/barang-masuk'
@@ -77,6 +78,11 @@ const AuthSignUpRoute = AuthSignUpRouteImport.update({
 const ProtectedAdminRoute = ProtectedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedAkunRoute = ProtectedAkunRouteImport.update({
+  id: '/akun',
+  path: '/akun',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedAppRoute = ProtectedAppRouteImport.update({
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
+  '/akun': typeof ProtectedAkunRoute
   '/app': typeof ProtectedAppRoute
   '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
+  '/akun': typeof ProtectedAkunRoute
   '/app': typeof ProtectedAppRoute
   '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/_auth/sign-in': typeof AuthSignInRoute
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/_protected/admin': typeof ProtectedAdminRoute
+  '/_protected/akun': typeof ProtectedAkunRoute
   '/_protected/app': typeof ProtectedAppRoute
   '/_protected/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/_protected/barang-masuk': typeof ProtectedBarangMasukRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/admin'
+    | '/akun'
     | '/app'
     | '/barang-keluar'
     | '/barang-masuk'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/admin'
+    | '/akun'
     | '/app'
     | '/barang-keluar'
     | '/barang-masuk'
@@ -364,6 +375,7 @@ export interface FileRouteTypes {
     | '/_auth/sign-in'
     | '/_auth/sign-up'
     | '/_protected/admin'
+    | '/_protected/akun'
     | '/_protected/app'
     | '/_protected/barang-keluar'
     | '/_protected/barang-masuk'
@@ -466,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof ProtectedAdminRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/akun': {
+      id: '/_protected/akun'
+      path: '/akun'
+      fullPath: '/akun'
+      preLoaderRoute: typeof ProtectedAkunRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/app': {
@@ -650,6 +669,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface ProtectedRouteChildren {
   ProtectedAdminRoute: typeof ProtectedAdminRoute
+  ProtectedAkunRoute: typeof ProtectedAkunRoute
   ProtectedAppRoute: typeof ProtectedAppRoute
   ProtectedBarangKeluarRoute: typeof ProtectedBarangKeluarRoute
   ProtectedBarangMasukRoute: typeof ProtectedBarangMasukRoute
@@ -661,6 +681,7 @@ interface ProtectedRouteChildren {
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAdminRoute: ProtectedAdminRoute,
+  ProtectedAkunRoute: ProtectedAkunRoute,
   ProtectedAppRoute: ProtectedAppRoute,
   ProtectedBarangKeluarRoute: ProtectedBarangKeluarRoute,
   ProtectedBarangMasukRoute: ProtectedBarangMasukRoute,

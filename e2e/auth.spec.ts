@@ -63,8 +63,8 @@ test("signup, persisted session, signout, rejected password, and signin work", a
     .fill("incorrect-password");
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(
-    page.getByRole("alert").filter({ hasText: "We couldn't sign you in." }),
-  ).toContainText("Check your email and password");
+    page.getByRole("alert").filter({ hasText: "Belum berhasil masuk." }),
+  ).toContainText("Periksa email dan kata sandi");
   await page.getByLabel("Kata sandi", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page).toHaveURL(/\/app$/);
@@ -104,7 +104,7 @@ test("auth pages fit a narrow screen", async ({ page }) => {
     ),
   ).toBe(true);
   await page
-    .getByRole("link", { name: "Create an account", exact: true })
+    .getByRole("link", { name: "Daftar akun toko", exact: true })
     .click();
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   expect(
