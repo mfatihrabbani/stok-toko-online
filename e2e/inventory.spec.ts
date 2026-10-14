@@ -104,6 +104,19 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
     expect((await (await stranger.get("/api/products")).json()).data).toEqual(
       [],
     );
+    expect(
+      (
+        await stranger.patch(`/api/products/${product.id}`, {
+          headers,
+          data: { name: "Produk dicoba akun lain" },
+        })
+      ).status(),
+    ).toBe(404);
+    expect(
+      (
+        await stranger.delete(`/api/products/${product.id}`, { headers })
+      ).status(),
+    ).toBe(404);
     expect((await stranger.get(`/api/products/${product.id}`)).status()).toBe(
       404,
     );
