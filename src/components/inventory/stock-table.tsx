@@ -10,8 +10,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatNumber, stockStatus, type Product } from "@/lib/inventory";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 export function StockTable({ products }: { products: Product[] }) {
+  if (products.length === 0) {
+    return (
+      <Empty className="min-h-64">
+        <EmptyHeader>
+          <EmptyMedia>
+            <PackageX
+              className="size-8 text-muted-foreground"
+              aria-hidden="true"
+            />
+          </EmptyMedia>
+          <EmptyTitle>
+            <h3>Belum ada produk</h3>
+          </EmptyTitle>
+          <EmptyDescription>
+            Produk pertama yang Anda tambahkan akan muncul di daftar ini.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
   return (
     <Table className="stock-table">
       <TableCaption className="sr-only">
