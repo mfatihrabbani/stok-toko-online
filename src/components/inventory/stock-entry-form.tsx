@@ -63,6 +63,11 @@ export function StockEntryForm({
   }
   const [note, setNote] = useState("");
   const [reviewing, setReviewing] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    kind: "success" | "error";
+    message: string;
+  }>();
+  const savingRef = useRef(false);
   const [errors, setErrors] = useState<{ product?: string; quantity?: string }>(
     {},
   );
@@ -77,6 +82,40 @@ export function StockEntryForm({
     amount > 0 &&
     amount <= 2147483647 - (product?.stock ?? 0);
   const after = (product?.stock ?? 0) + (valid ? amount : 0);
+  function save() {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    try {
+      if (!product || !valid)
+        throw new Error("Periksa kembali produk dan jumlah barang.");
+      setProducts((current) =>
+        current.map((item) =>
+          item.id === product.id ? { ...item, stock: after } : item,
+        ),
+      );
+      setFeedback({
+        kind: "success",
+        message: `${formatNumber(amount)} ${product.unit} ${product.name} berhasil dicatat. Stok contoh kini ${formatNumber(after)} ${product.unit}.`,
+      });
+      setReviewing(false);
+      setQuantity("");
+      setNote("");
+      setProductQuery("");
+      setErrors({});
+      setAddingProduct(false);
+    } catch (error) {
+      setReviewing(false);
+      setFeedback({
+        kind: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Catatan belum tersimpan. Coba lagi; isian kamu tetap ada.",
+      });
+    } finally {
+      savingRef.current = false;
+    }
+  }
   function review(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (addingProduct) return;
@@ -104,6 +143,18 @@ export function StockEntryForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={review} noValidate className="flex flex-col gap-6">
+            {feedback && (
+              <p
+                role={feedback.kind === "error" ? "alert" : "status"}
+                className={
+                  feedback.kind === "error"
+                    ? "rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                    : "rounded-md bg-success-soft p-3 text-sm text-success"
+                }
+              >
+                {feedback.message}
+              </p>
+            )}
             <FieldGroup className="gap-5">
               <Field className="gap-2">
                 <FieldLabel htmlFor="entry-search">Cari produk</FieldLabel>
@@ -312,6 +363,7 @@ export function StockEntryForm({
         open={reviewing}
         onOpenChange={setReviewing}
         onCloseFocus={() => reviewRef.current?.focus()}
+        onConfirm={save}
       />
     </div>
   );
