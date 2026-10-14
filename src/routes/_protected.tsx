@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   ChevronRight,
   LayoutDashboard,
+  Package,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -52,6 +53,14 @@ function ProtectedLayout() {
             >
               <LayoutDashboard aria-hidden="true" />
               Stok barang
+            </Link>
+            <Link
+              to="/produk"
+              className="stock-nav-link"
+              activeProps={{ "aria-current": "page" }}
+            >
+              <Package aria-hidden="true" />
+              Produk
             </Link>
           </div>
         </nav>
