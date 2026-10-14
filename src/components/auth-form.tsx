@@ -36,7 +36,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           signingUp
             ? result.error.message ||
                 "We couldn't create your account. Please try again."
-            : "We couldn't sign you in. Check your email and password and try again.",
+            : "Belum berhasil masuk. Periksa email dan kata sandi Anda.",
         );
         return;
       }
@@ -44,9 +44,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       await router.invalidate();
       await navigate({ to: siteConfig.homePath, replace: true });
     } catch {
-      setError(
-        "We couldn't reach the server. Check your connection and try again.",
-      );
+      setError("Server belum dapat dihubungi. Periksa koneksi lalu coba lagi.");
     } finally {
       setPending(false);
     }
@@ -55,15 +53,15 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   return (
     <div className="w-full max-w-sm">
       <p className="mb-3 text-sm font-medium text-primary">
-        {signingUp ? "A place to begin" : "Good to see you"}
+        {signingUp ? "A place to begin" : "Persediaan toko Anda"}
       </p>
       <h1 className="text-3xl font-semibold tracking-tight">
-        {signingUp ? "Create your account" : "Welcome back"}
+        {signingUp ? "Create your account" : "Masuk ke toko"}
       </h1>
       <p className="mt-3 text-base leading-7 text-muted-foreground">
         {signingUp
           ? "One small step. Then make this app your own."
-          : "Sign in to pick up where you left off."}
+          : "Lihat stok dan catat barang masuk atau keluar dengan akun Anda."}
       </p>
       <form
         onSubmit={onSubmit}
@@ -73,7 +71,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       >
         <fieldset disabled={pending} className="space-y-5">
           <legend className="sr-only">
-            {signingUp ? "Account details" : "Sign in details"}
+            {signingUp ? "Account details" : "Data untuk masuk"}
           </legend>
           {signingUp && (
             <div className="space-y-2">
@@ -103,7 +101,9 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">
+              {signingUp ? "Password" : "Kata sandi"}
+            </Label>
             <Input
               id="password"
               name="password"
@@ -137,21 +137,21 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
               />
             ) : null}
             {pending
-              ? "Please wait…"
+              ? "Mohon tunggu..."
               : signingUp
                 ? "Create account"
-                : "Sign in"}
+                : "Masuk"}
             {!pending && <ArrowRight aria-hidden="true" />}
           </Button>
         </fieldset>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        {signingUp ? "Already have an account?" : "New here?"}{" "}
+        {signingUp ? "Already have an account?" : "Belum punya akun toko?"}{" "}
         <Link
           className="rounded-sm font-medium text-foreground underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
           to={signingUp ? "/sign-in" : "/sign-up"}
         >
-          {signingUp ? "Sign in" : "Create an account"}
+          {signingUp ? "Sign in" : "Daftar akun toko"}
         </Link>
       </p>
     </div>
