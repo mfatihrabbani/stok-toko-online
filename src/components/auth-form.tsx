@@ -208,6 +208,13 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           </FieldGroup>
         </fieldset>
       </form>
+      {!signingUp && (
+        <p className="mt-5 text-right text-sm">
+          <Link to="/forgot-password" className="underline underline-offset-4">
+            Lupa kata sandi?
+          </Link>
+        </p>
+      )}
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {signingUp ? "Sudah punya akun toko?" : "Belum punya akun toko?"}{" "}
         <Link
