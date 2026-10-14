@@ -14,6 +14,27 @@ export const productFields = {
   updatedAt: products.updatedAt,
 };
 
+export async function getStockSummary(userId: string) {
+  const [summary] = await db
+    .select({
+      productCount: sql`count(*)`.mapWith(Number),
+      totalStock: sql`coalesce(sum(${products.stock}::bigint), 0)`.mapWith(
+        Number,
+      ),
+      lowCount:
+        sql`count(*) filter (where ${products.stock} > 0 and ${products.stock} < ${products.minStock})`.mapWith(
+          Number,
+        ),
+      emptyCount: sql`count(*) filter (where ${products.stock} = 0)`.mapWith(
+        Number,
+      ),
+      categoryCount: sql`count(distinct ${products.category})`.mapWith(Number),
+    })
+    .from(products)
+    .where(eq(products.userId, userId));
+  return summary;
+}
+
 export async function listProducts(
   userId: string,
   { limit, offset, q, category, status }: ListProductsInput,
