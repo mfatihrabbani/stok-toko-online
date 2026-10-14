@@ -12,7 +12,7 @@ export const auth = betterAuth({
   appName: siteConfig.name,
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
-  database: drizzleAdapter(db, { provider: "pg", schema }),
+  database: drizzleAdapter(db, { provider: "pg", schema, transaction: true }),
   advanced: { cookiePrefix: `ngodingpakeai-${siteConfig.id}` },
   emailAndPassword: {
     enabled: true,
