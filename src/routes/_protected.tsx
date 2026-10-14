@@ -1,4 +1,4 @@
-﻿import {
+import {
   createFileRoute,
   Link,
   Outlet,

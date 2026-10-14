@@ -1,4 +1,4 @@
-﻿import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, PackageX } from "lucide-react";
 import { StockStatus } from "@/components/inventory/stock-status";
 import { Button } from "@/components/ui/button";
@@ -20,17 +20,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatNumber, stockStatus, type Product } from "@/lib/inventory";
+import type { StockSearch } from "@/lib/stock-search";
 
 export function StockTable({
   products,
   emptyTitle = "Belum ada produk",
   emptyDescription = "Produk pertama yang Anda tambahkan akan muncul di daftar ini.",
   onReset,
+  returnSearch,
 }: {
   products: Product[];
   emptyTitle?: string;
   emptyDescription?: string;
   onReset?: () => void;
+  returnSearch?: StockSearch;
 }) {
   if (products.length === 0) {
     return (
@@ -81,6 +84,7 @@ export function StockTable({
               <Link
                 to="/products/$id"
                 params={{ id: product.id }}
+                search={returnSearch}
                 className="block w-fit rounded-sm font-medium hover:underline focus-visible:outline-2 focus-visible:outline-ring"
               >
                 {product.name}
@@ -112,6 +116,7 @@ export function StockTable({
                 <Link
                   to="/products/$id"
                   params={{ id: product.id }}
+                  search={returnSearch}
                   aria-label={`Lihat detail ${product.name}`}
                 >
                   <ArrowUpRight aria-hidden="true" />

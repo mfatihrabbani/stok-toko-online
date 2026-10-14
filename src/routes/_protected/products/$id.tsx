@@ -14,8 +14,10 @@ import { Separator } from "@/components/ui/separator";
 import { StockStatus } from "@/components/inventory/stock-status";
 import { demoProducts, formatNumber, stockStatus } from "@/lib/inventory";
 import { siteConfig } from "@/config/site";
+import { parseStockSearch } from "@/lib/stock-search";
 
 export const Route = createFileRoute("/_protected/products/$id")({
+  validateSearch: parseStockSearch,
   head: () => ({ meta: [{ title: `Detail produk | ${siteConfig.name}` }] }),
   loader: ({ params }) => {
     const product = demoProducts.find((item) => item.id === params.id);
@@ -28,6 +30,7 @@ export const Route = createFileRoute("/_protected/products/$id")({
 
 function ProductDetailPage() {
   const { product } = Route.useLoaderData();
+  const search = Route.useSearch();
   const status = stockStatus(product);
   return (
     <div className="flex flex-col gap-6">
@@ -36,6 +39,7 @@ function ProductDetailPage() {
       </h1>
       <Link
         to="/app"
+        search={search}
         className="flex w-fit items-center gap-2 rounded-sm text-sm text-muted-foreground underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -97,6 +101,7 @@ function ProductDetailPage() {
 }
 
 function ProductNotFound() {
+  const search = Route.useSearch();
   return (
     <Empty>
       <EmptyHeader>
@@ -113,7 +118,9 @@ function ProductNotFound() {
       </EmptyHeader>
       <EmptyContent>
         <Button asChild>
-          <Link to="/app">Kembali ke stok</Link>
+          <Link to="/app" search={search}>
+            Kembali ke stok
+          </Link>
         </Button>
       </EmptyContent>
     </Empty>

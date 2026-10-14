@@ -1,4 +1,3 @@
-﻿import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,20 +16,36 @@ import {
   filterProducts,
 } from "@/lib/inventory";
 import { siteConfig } from "@/config/site";
+import {
+  parseStockSearch,
+  stockFiltersFromSearch,
+  stockSearchFromFilters,
+} from "@/lib/stock-search";
+import type { ProductFilters } from "@/lib/inventory";
 
 export const Route = createFileRoute("/_protected/app")({
+  validateSearch: parseStockSearch,
   head: () => ({ meta: [{ title: `Stok barang | ${siteConfig.name}` }] }),
   component: StockPage,
 });
 
 function StockPage() {
-  const [filters, setFilters] = useState(defaultProductFilters);
+  const search = Route.useSearch();
+  const filters = stockFiltersFromSearch(search);
+  const navigate = Route.useNavigate();
+  const update = (changes: Partial<ProductFilters>) => {
+    void navigate({
+      search: stockSearchFromFilters({ ...filters, ...changes }),
+      replace: true,
+      resetScroll: false,
+    });
+  };
   const products = filterProducts(demoProducts, filters);
   const active =
     Boolean(filters.query.trim()) ||
     filters.category !== "all" ||
     filters.status !== "all";
-  const reset = () => setFilters(defaultProductFilters);
+  const reset = () => update(defaultProductFilters);
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -53,15 +68,14 @@ function StockPage() {
           <StockFilters
             products={demoProducts}
             filters={filters}
-            onChange={(changes) =>
-              setFilters((current) => ({ ...current, ...changes }))
-            }
+            onChange={update}
             onReset={reset}
           />
         </CardHeader>
         <CardContent className="px-0">
           <StockTable
             products={products}
+            returnSearch={search}
             emptyTitle={active ? "Produk tidak ditemukan" : undefined}
             emptyDescription={
               active

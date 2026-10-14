@@ -93,6 +93,43 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
   await page
     .getByRole("link", { name: "Kembali ke stok", exact: true })
     .click();
+  await page.getByLabel("Cari produk", { exact: true }).fill("Topi");
+  await page.getByLabel("Kategori", { exact: true }).selectOption("Pakaian");
+  await page.getByRole("radio", { name: "Menipis 3", exact: true }).click();
+  await page
+    .getByRole("link", { name: "Topi Baseball — Hitam", exact: true })
+    .click();
+  await page
+    .getByRole("link", { name: "Kembali ke stok", exact: true })
+    .click();
+  await expect(page.getByLabel("Cari produk", { exact: true })).toHaveValue(
+    "Topi",
+  );
+  await expect(page.getByLabel("Kategori", { exact: true })).toHaveValue(
+    "Pakaian",
+  );
+  await expect(
+    page.getByRole("radio", { name: "Menipis 3", exact: true }),
+  ).toBeChecked();
+  await page.reload();
+  await expect(page.getByLabel("Cari produk", { exact: true })).toHaveValue(
+    "Topi",
+  );
+  await page.getByRole("button", { name: "Reset filter", exact: true }).click();
+  const lastProduct = page.getByRole("link", {
+    name: "Keychain Akrilik",
+    exact: true,
+  });
+  await lastProduct.scrollIntoViewIfNeeded();
+  const beforeDetailScroll = await page.evaluate(() => window.scrollY);
+  expect(beforeDetailScroll).toBeGreaterThan(0);
+  await lastProduct.click();
+  await page
+    .getByRole("link", { name: "Kembali ke stok", exact: true })
+    .click();
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(beforeDetailScroll - 40);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(
     page.getByRole("heading", { name: "Stok barang", exact: true }),
