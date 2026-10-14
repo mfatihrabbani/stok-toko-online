@@ -11,3 +11,12 @@ export const listProductsSchema = z
   })
   .strict();
 export type ListProductsInput = z.infer<typeof listProductsSchema>;
+export const incomingStockSchema = z
+  .object({
+    productId: inventoryIdSchema,
+    quantity: z.number().int().min(1).max(2147483647),
+    note: z.string().trim().max(300).default(""),
+    requestId: z.string().uuid(),
+  })
+  .strict();
+export type IncomingStockInput = z.infer<typeof incomingStockSchema>;

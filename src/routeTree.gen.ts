@@ -25,6 +25,7 @@ import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
 import { Route as ApiProductsIndexRouteImport } from './routes/api/products/index'
 import { Route as ApiProductsIdRouteImport } from './routes/api/products/$id'
 import { Route as ApiProductsSummaryRouteImport } from './routes/api/products/summary'
+import { Route as ApiStockIncomingRouteImport } from './routes/api/stock/incoming'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
 
@@ -106,6 +107,11 @@ const ApiProductsSummaryRoute = ApiProductsSummaryRouteImport.update({
   path: '/api/products/summary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStockIncomingRoute = ApiStockIncomingRouteImport.update({
+  id: '/api/stock/incoming',
+  path: '/api/stock/incoming',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminNotesIndexRoute = ApiAdminNotesIndexRouteImport.update({
   id: '/api/admin/notes/',
   path: '/api/admin/notes/',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
+  '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
+  '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/products': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
+  '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/api/notes/$id'
     | '/api/products/$id'
     | '/api/products/summary'
+    | '/api/stock/incoming'
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/api/notes/$id'
     | '/api/products/$id'
     | '/api/products/summary'
+    | '/api/stock/incoming'
     | '/api/notes'
     | '/api/products'
     | '/api/admin/notes/$id'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/api/notes/$id'
     | '/api/products/$id'
     | '/api/products/summary'
+    | '/api/stock/incoming'
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
@@ -241,6 +253,7 @@ export interface RootRouteChildren {
   ApiNotesIdRoute: typeof ApiNotesIdRoute
   ApiProductsIdRoute: typeof ApiProductsIdRoute
   ApiProductsSummaryRoute: typeof ApiProductsSummaryRoute
+  ApiStockIncomingRoute: typeof ApiStockIncomingRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiProductsIndexRoute: typeof ApiProductsIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
@@ -361,6 +374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProductsSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stock/incoming': {
+      id: '/api/stock/incoming'
+      path: '/api/stock/incoming'
+      fullPath: '/api/stock/incoming'
+      preLoaderRoute: typeof ApiStockIncomingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/notes/': {
       id: '/api/admin/notes/'
       path: '/api/admin/notes'
@@ -418,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiNotesIdRoute: ApiNotesIdRoute,
   ApiProductsIdRoute: ApiProductsIdRoute,
   ApiProductsSummaryRoute: ApiProductsSummaryRoute,
+  ApiStockIncomingRoute: ApiStockIncomingRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiProductsIndexRoute: ApiProductsIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,

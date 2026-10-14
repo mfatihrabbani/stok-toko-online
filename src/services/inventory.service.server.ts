@@ -3,6 +3,8 @@ import { db } from "@/db/index.server";
 import { products } from "@/db/schema/products";
 import { stockMovements } from "@/db/schema/stock-movements";
 import type { ListProductsInput } from "@/validators/inventory";
+import type { IncomingStockInput } from "@/validators/inventory";
+import { InventoryError } from "@/lib/inventory-error";
 
 export const productFields = {
   id: products.id,
@@ -14,6 +16,87 @@ export const productFields = {
   unit: products.unit,
   updatedAt: products.updatedAt,
 };
+
+export async function recordIncoming(
+  userId: string,
+  input: IncomingStockInput,
+) {
+  return db.transaction(async (tx) => {
+    const [product] = await tx
+      .select(productFields)
+      .from(products)
+      .where(and(eq(products.id, input.productId), eq(products.userId, userId)))
+      .for("update");
+    if (!product)
+      throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
+    const [previous] = await tx
+      .select()
+      .from(stockMovements)
+      .where(
+        and(
+          eq(stockMovements.userId, userId),
+          eq(stockMovements.requestId, input.requestId),
+        ),
+      )
+      .limit(1);
+    if (previous) {
+      if (
+        previous.productId !== input.productId ||
+        previous.direction !== "in" ||
+        previous.quantity !== input.quantity ||
+        previous.note !== input.note
+      )
+        throw new InventoryError(
+          "REQUEST_CONFLICT",
+          "Identitas catatan telah dipakai. Tinjau ulang isian sebelum menyimpan.",
+        );
+      return {
+        product: { ...product, updatedAt: product.updatedAt.toISOString() },
+        receipt: {
+          id: previous.id,
+          stockBefore: previous.stockBefore,
+          stockAfter: previous.stockAfter,
+          quantity: previous.quantity,
+        },
+      };
+    }
+    const after = product.stock + input.quantity;
+    if (!Number.isSafeInteger(after) || after > 2147483647)
+      throw new InventoryError(
+        "INVALID_STOCK",
+        "Jumlah masuk terlalu besar untuk stok produk ini.",
+      );
+    const [updated] = await tx
+      .update(products)
+      .set({ stock: after })
+      .where(and(eq(products.id, product.id), eq(products.userId, userId)))
+      .returning(productFields);
+    const [movement] = await tx
+      .insert(stockMovements)
+      .values({
+        userId,
+        productId: product.id,
+        productName: product.name,
+        productSku: product.sku,
+        direction: "in",
+        quantity: input.quantity,
+        stockBefore: product.stock,
+        stockAfter: after,
+        note: input.note,
+        requestId: input.requestId,
+      })
+      .returning({ id: stockMovements.id });
+    return {
+      product: { ...updated, updatedAt: updated.updatedAt.toISOString() },
+      receipt: {
+        id: movement.id,
+        stockBefore: product.stock,
+        stockAfter: after,
+        quantity: input.quantity,
+      },
+    };
+  });
+}
 
 export async function getInventory(userId: string) {
   const rows = await db
