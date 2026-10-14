@@ -79,10 +79,17 @@ export const outgoingStockSchema = z
 export type OutgoingStockInput = z.infer<typeof outgoingStockSchema>;
 export const listMovementsSchema = z
   .object({
+    q: z.string().trim().max(160).default(""),
+    from: z.iso.date().optional(),
+    to: z.iso.date().optional(),
     limit: z.coerce.number().int().min(1).max(1000).default(50),
     offset: z.coerce.number().int().min(0).max(1_000_000).default(0),
     direction: z.enum(["in", "out"]).optional(),
     productId: inventoryIdSchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (value) => !value.from || !value.to || value.from <= value.to,
+    "Tanggal akhir harus sesudah tanggal awal.",
+  );
 export type ListMovementsInput = z.infer<typeof listMovementsSchema>;

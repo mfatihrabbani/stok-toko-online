@@ -22,6 +22,7 @@ import {
   filterMovements,
   formatDateTime,
   type StockMovement,
+  type MovementFilters,
 } from "@/lib/movements";
 import {
   Empty,
@@ -33,10 +34,21 @@ import {
 
 export function MovementHistory({
   initialMovements = demoMovements,
+  filters: externalFilters,
+  onFiltersChange,
+  pagination,
 }: {
   initialMovements?: StockMovement[];
+  filters?: MovementFilters;
+  onFiltersChange?: (filters: MovementFilters) => void;
+  pagination?: {
+    offset: number;
+    hasMore: boolean;
+    onChange: (offset: number) => void;
+  };
 }) {
-  const [filters, setFilters] = useState(defaultMovementFilters);
+  const [localFilters, setFilters] = useState(defaultMovementFilters);
+  const filters = externalFilters ?? localFilters;
   const [selected, setSelected] = useState<StockMovement>();
   const detailTrigger = useRef<HTMLButtonElement | null>(null);
   const movements = filterMovements(initialMovements, filters).sort(
@@ -74,9 +86,12 @@ export function MovementHistory({
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Data contoh untuk pratinjau riwayat.
+            Catatan barang masuk dan keluar toko Anda.
           </p>
-          <MovementFiltersBar filters={filters} onChange={setFilters} />
+          <MovementFiltersBar
+            filters={filters}
+            onChange={onFiltersChange ?? setFilters}
+          />
           <p role="status" className="text-xs text-muted-foreground">
             {movements.length} catatan ditemukan · Waktu Indonesia Barat
           </p>
@@ -173,6 +188,31 @@ export function MovementHistory({
           )}
         </CardContent>
       </Card>
+      {pagination && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Halaman {Math.floor(pagination.offset / 50) + 1}
+          </p>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              disabled={pagination.offset === 0}
+              onClick={() =>
+                pagination.onChange(Math.max(0, pagination.offset - 50))
+              }
+            >
+              Sebelumnya
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!pagination.hasMore}
+              onClick={() => pagination.onChange(pagination.offset + 50)}
+            >
+              Berikutnya
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, lt, or, sql, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, lt, or, sql, isNull } from "drizzle-orm";
 import { db } from "@/db/index.server";
 import { products } from "@/db/schema/products";
 import { categories } from "@/db/schema/categories";
@@ -43,6 +43,21 @@ export async function listMovements(
     .where(
       and(
         eq(stockMovements.userId, userId),
+        input.from
+          ? gte(
+              stockMovements.createdAt,
+              new Date(`${input.from}T00:00:00+07:00`),
+            )
+          : undefined,
+        input.to
+          ? lt(
+              stockMovements.createdAt,
+              new Date(Date.parse(`${input.to}T00:00:00+07:00`) + 86_400_000),
+            )
+          : undefined,
+        input.q
+          ? sql`position(lower(${input.q}) in lower(concat_ws(' ', ${stockMovements.productName}, ${stockMovements.productSku}, ${stockMovements.note}))) > 0`
+          : undefined,
         input.direction
           ? eq(stockMovements.direction, input.direction)
           : undefined,
