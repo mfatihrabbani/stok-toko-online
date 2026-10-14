@@ -13,3 +13,5 @@ Keluar mengakhiri sesi; produk dan riwayat tetap tersimpan. Halaman serta API pe
 Pemulihan akun lokal memakai Mailpit. `npm run dev` menyiapkan layanan email secara otomatis; `npm run mail:up` menyalakannya secara terpisah. Buka tautan **kotak masuk lokal** pada halaman lupa kata sandi untuk membaca email pemulihan. Email ditampung di komputer ini dan tidak dikirim ke inbox Gmail atau layanan email pribadi. Pengaturan SMTP yang sudah disediakan dipertahankan.
 
 `POST /api/auth/request-password-reset` memberi respons umum agar tidak mengungkap akun yang terdaftar. Email berisi tautan pemulihan yang berlaku 30 menit. `POST /api/auth/reset-password` memakai token tersebut sekali, menyimpan hash kata sandi baru, dan mengakhiri semua sesi lama dalam transaksi auth. Tautan kedaluwarsa atau yang sudah dipakai tidak dapat digunakan lagi.
+
+Daftar, ringkasan stok, detail produk, kategori, peringatan, dan riwayat selalu menerima ID akun dari sesi server. Permintaan pengguna tidak boleh menetapkan pemilik data. Akun lain mendapat daftar kosong untuk data tokonya sendiri dan respons 404 bila mencoba membaca atau mengubah ID produk/catatan toko lain.
