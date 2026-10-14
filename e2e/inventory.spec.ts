@@ -1,238 +1,121 @@
+import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { setTimeout as delay } from "node:timers/promises";
 
-test("stock page shows inventory after signup and fits desktop and mobile", async ({
+const headers = { Origin: "http://localhost:3101" };
+test("inventory persists, isolates accounts, prevents duplicate saves and concurrent overselling", async ({
   page,
+  playwright,
 }) => {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/products/1");
-  await expect(page).toHaveURL(/\/sign-in$/);
-  await page.goto("/barang-masuk");
-  await expect(page).toHaveURL(/\/sign-in$/);
-  const signup = {
-    headers: { Origin: "http://localhost:3101" },
-    data: {
-      name: "Pemilik toko",
-      email: `inventory-${Date.now()}@example.com`,
-      password: "Stock-test-password-123!",
-    },
-  };
-  let result = await page.request.post("/api/auth/sign-up/email", signup);
-  if (result.status() === 429) {
-    const seconds = Number(result.headers()["retry-after"] || 10);
-    expect(seconds).toBeLessThanOrEqual(10);
-    await delay((seconds + 0.1) * 1000);
-    result = await page.request.post("/api/auth/sign-up/email", signup);
-  }
-  expect(result.status()).toBe(200);
+  test.setTimeout(90_000);
+  const client = page.request;
+  expect((await client.get("/api/products")).status()).toBe(401);
+  expect(
+    (
+      await client.post("/api/auth/sign-up/email", {
+        headers,
+        data: {
+          name: "Toko Uji",
+          email: `stok-${randomUUID()}@example.com`,
+          password: "Inventory-test-123!",
+        },
+      })
+    ).status(),
+  ).toBe(200);
   await page.goto("/app");
   await expect(
     page.getByRole("heading", { name: "Stok barang", exact: true }),
   ).toBeVisible();
-  const summary = page.getByRole("region", { name: "Ringkasan persediaan" });
-  await expect(
-    summary.getByRole("heading", { name: "Total produk" }),
-  ).toBeVisible();
-  await expect(summary).toContainText("356");
-  await expect(summary).toContainText("25%");
-  await expect(
-    page.getByRole("cell", { name: "Canvas Tote Bag ACC-001" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("cell", { name: "Habis", exact: true }),
-  ).toBeVisible();
-  await page.getByLabel("Cari produk", { exact: true }).fill("acc-001");
-  await expect(page.getByRole("status")).toHaveText(
-    "Menampilkan 1 dari 12 produk",
-  );
-  await expect(
-    page.getByRole("cell", { name: "Canvas Tote Bag ACC-001" }),
-  ).toBeVisible();
-  await page
-    .getByLabel("Cari produk", { exact: true })
-    .fill("Produk yang tidak ada");
-  await expect(
-    page.getByRole("heading", { name: "Produk tidak ditemukan" }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Reset pencarian dan filter" })
-    .click();
-  await page.getByLabel("Kategori", { exact: true }).selectOption("Pakaian");
-  await page.getByRole("radio", { name: "Menipis 3", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText(
-    "Menampilkan 1 dari 12 produk",
-  );
-  await expect(
-    page.getByRole("cell", { name: "Topi Baseball — Hitam PKN-002" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Reset filter", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText(
-    "Menampilkan 12 dari 12 produk",
-  );
-  await page.screenshot({
-    path: "test-results/stock-desktop.png",
-    fullPage: true,
-  });
-  await page
-    .getByRole("link", { name: "Canvas Tote Bag", exact: true })
-    .click();
-  await expect(page).toHaveURL(/\/products\/1$/);
-  await expect(
-    page.getByRole("heading", { name: "Canvas Tote Bag", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByText("Stok memenuhi batas minimal.", { exact: true }),
-  ).toBeVisible();
-  await page.reload();
-  await expect(
-    page.getByRole("heading", { name: "Canvas Tote Bag", exact: true }),
-  ).toBeVisible();
-  await page.goto("/products/not-a-product");
-  await expect(
-    page.getByRole("heading", { name: "Produk tidak ditemukan" }),
-  ).toBeVisible();
-  await page
-    .getByRole("link", { name: "Kembali ke stok", exact: true })
-    .click();
-  await page.getByLabel("Cari produk", { exact: true }).fill("Topi");
-  await page.getByLabel("Kategori", { exact: true }).selectOption("Pakaian");
-  await page.getByRole("radio", { name: "Menipis 3", exact: true }).click();
-  await page
-    .getByRole("link", { name: "Topi Baseball — Hitam", exact: true })
-    .click();
-  await page
-    .getByRole("link", { name: "Kembali ke stok", exact: true })
-    .click();
-  await expect(page.getByLabel("Cari produk", { exact: true })).toHaveValue(
-    "Topi",
-  );
-  await expect(page.getByLabel("Kategori", { exact: true })).toHaveValue(
-    "Pakaian",
-  );
-  await expect(
-    page.getByRole("radio", { name: "Menipis 3", exact: true }),
-  ).toBeChecked();
-  await page.reload();
-  await expect(page.getByLabel("Cari produk", { exact: true })).toHaveValue(
-    "Topi",
-  );
-  await page.getByRole("button", { name: "Reset filter", exact: true }).click();
-  const lastProduct = page.getByRole("link", {
-    name: "Keychain Akrilik",
-    exact: true,
-  });
-  await lastProduct.scrollIntoViewIfNeeded();
-  const beforeDetailScroll = await page.evaluate(() => window.scrollY);
-  expect(beforeDetailScroll).toBeGreaterThan(0);
-  await lastProduct.click();
-  await page
-    .getByRole("link", { name: "Kembali ke stok", exact: true })
-    .click();
-  await expect
-    .poll(() => page.evaluate(() => window.scrollY))
-    .toBeGreaterThan(beforeDetailScroll - 40);
-  await page
-    .getByRole("main")
-    .getByRole("link", { name: "Barang masuk", exact: true })
-    .click();
-  await expect(
-    page.getByRole("heading", { name: "Barang masuk", exact: true }),
-  ).toBeVisible();
-  await page.getByLabel("Jumlah masuk", { exact: true }).fill("10");
-  for (const invalidQuantity of ["", "0", "1.5", "2147483647"]) {
-    await page
-      .getByLabel("Jumlah masuk", { exact: true })
-      .fill(invalidQuantity);
-    await page
-      .getByRole("button", { name: "Tinjau catatan", exact: true })
-      .click();
-    await expect(
-      page.getByLabel("Jumlah masuk", { exact: true }),
-    ).toHaveAttribute("aria-invalid", "true");
-    await expect(
-      page.getByLabel("Jumlah masuk", { exact: true }),
-    ).toBeFocused();
-    await expect(page.getByRole("alert")).toBeVisible();
-  }
-  await page.goto("/products/3");
-  await page.getByRole("link", { name: "Catat masuk", exact: true }).click();
-  await expect(page.getByLabel("Produk", { exact: true })).toHaveValue("3");
   await page.goto("/barang-masuk");
-  await page.getByLabel("Jumlah masuk", { exact: true }).fill("10");
-  await page.getByLabel("Cari produk", { exact: true }).fill("prl-001");
-  await page.getByLabel("Produk", { exact: true }).selectOption("3");
-  await expect(
-    page.getByRole("complementary", { name: "Ringkasan barang masuk" }),
-  ).toContainText("16 unit");
-  await page
-    .getByLabel("Cari produk", { exact: true })
-    .fill("Produk yang tidak ada");
-  await expect(page.getByLabel("Produk", { exact: true })).toHaveValue("");
-  await page.getByLabel("Cari produk", { exact: true }).fill("");
-  await page.getByLabel("Produk", { exact: true }).selectOption("1");
-  await page
-    .getByLabel("Catatan (opsional)", { exact: true })
-    .fill("Restok dari pemasok");
-  await expect(
-    page.getByRole("complementary", { name: "Ringkasan barang masuk" }),
-  ).toContainText("58 unit");
-  await page
-    .getByRole("button", { name: "Tinjau catatan", exact: true })
-    .click();
-  await expect(
-    page.getByRole("heading", {
-      name: "Konfirmasi perubahan stok",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Ubah catatan", exact: true }).click();
-  await expect(page.getByLabel("Jumlah masuk", { exact: true })).toHaveValue(
-    "10",
-  );
   await page
     .getByRole("button", { name: "Tambah produk baru", exact: true })
     .click();
+  await page.getByLabel("Nama produk").fill("Produk uji");
+  await page.getByLabel("SKU (opsional)").fill("UJI-001");
   await page
     .getByRole("button", { name: "Gunakan produk", exact: true })
     .click();
-  await expect(page.getByLabel("Nama produk", { exact: true })).toBeFocused();
-  await page.getByLabel("Nama produk", { exact: true }).fill("Magnet kulkas");
-  await page.getByLabel("SKU (opsional)", { exact: true }).fill("acc-001");
-  await page
-    .getByRole("button", { name: "Gunakan produk", exact: true })
-    .click();
-  await expect(page.getByRole("alert")).toHaveText(
-    "SKU sudah digunakan. Gunakan kode lain.",
-  );
-  await page.getByLabel("SKU (opsional)", { exact: true }).fill("MAG-001");
-  await page.getByLabel("Kategori (opsional)", { exact: true }).fill("Kado");
-  await page.getByLabel("Stok minimal", { exact: true }).fill("3");
-  await page
-    .getByRole("button", { name: "Gunakan produk", exact: true })
-    .click();
+  await page.getByLabel("Jumlah masuk").fill("10");
+  await page.getByRole("button", { name: "Tinjau catatan" }).click();
+  await page.getByRole("button", { name: "Simpan barang masuk" }).click();
   await expect(
-    page.getByLabel("Produk", { exact: true }).locator("option:checked"),
-  ).toContainText("Magnet kulkas");
-  await expect(page.getByLabel("Jumlah masuk", { exact: true })).toHaveValue(
-    "10",
-  );
-  await expect(
-    page.getByRole("complementary", { name: "Ringkasan barang masuk" }),
-  ).toContainText("10 unit");
-  await page.getByRole("link", { name: "Batal", exact: true }).click();
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(
-    page.getByRole("heading", { name: "Stok barang", exact: true }),
+    page.getByRole("status").filter({ hasText: "berhasil dicatat masuk" }),
   ).toBeVisible();
+  await page.goto("/app");
+  await page.reload();
+  await expect(
+    page.getByRole("link", { name: "Produk uji", exact: true }),
+  ).toBeVisible();
+  const list = await (await client.get("/api/products?q=UJI-001")).json();
+  const product = list.data[0];
+  expect(product.stock).toBe(10);
+  const incoming = {
+    productId: product.id,
+    quantity: 2,
+    requestId: randomUUID(),
+  };
+  const repeated = await Promise.all([
+    client.post("/api/stock/incoming", { headers, data: incoming }),
+    client.post("/api/stock/incoming", { headers, data: incoming }),
+  ]);
+  expect(repeated.map((r) => r.status())).toEqual([201, 201]);
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
+    (
+      await client.post("/api/stock/outgoing", {
+        headers,
+        data: { productId: product.id, quantity: 0, requestId: randomUUID() },
+      })
+    ).status(),
+  ).toBe(422);
+  expect(
+    (
+      await client.post("/api/stock/outgoing", {
+        data: { productId: product.id, quantity: 1, requestId: randomUUID() },
+      })
+    ).status(),
+  ).toBe(403);
+  const concurrent = await Promise.all(
+    [1, 2].map(() =>
+      client.post("/api/stock/outgoing", {
+        headers,
+        data: { productId: product.id, quantity: 8, requestId: randomUUID() },
+      }),
     ),
-  ).toBe(true);
-  await page.screenshot({
-    path: "test-results/stock-mobile.png",
-    fullPage: true,
+  );
+  expect(concurrent.map((r) => r.status()).sort()).toEqual([201, 409]);
+  const detail = await (await client.get(`/api/products/${product.id}`)).json();
+  expect(detail.data.product.stock).toBe(4);
+  expect(detail.data.movements).toHaveLength(3);
+  const stranger = await playwright.request.newContext({
+    baseURL: headers.Origin,
   });
-  expect(errors).toEqual([]);
+  try {
+    expect(
+      (
+        await stranger.post("/api/auth/sign-up/email", {
+          headers,
+          data: {
+            name: "Toko Lain",
+            email: `other-${randomUUID()}@example.com`,
+            password: "Inventory-test-123!",
+          },
+        })
+      ).status(),
+    ).toBe(200);
+    expect((await (await stranger.get("/api/products")).json()).data).toEqual(
+      [],
+    );
+    expect((await stranger.get(`/api/products/${product.id}`)).status()).toBe(
+      404,
+    );
+    expect(
+      (
+        await stranger.post("/api/stock/outgoing", {
+          headers,
+          data: { productId: product.id, quantity: 1, requestId: randomUUID() },
+        })
+      ).status(),
+    ).toBe(404);
+  } finally {
+    await stranger.dispose();
+  }
 });

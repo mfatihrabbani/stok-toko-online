@@ -48,6 +48,17 @@ async function recordMovement(
   input: IncomingStockInput,
   direction: "in" | "out",
 ) {
+  if (
+    !Number.isSafeInteger(input.quantity) ||
+    input.quantity < 1 ||
+    input.quantity > 2147483647
+  )
+    throw new InventoryError(
+      "INVALID_STOCK",
+      "Jumlah harus bilangan bulat positif.",
+    );
+  if (direction === "out" && !input.productId)
+    throw new InventoryError("NOT_FOUND", "Pilih produk yang sudah terdaftar.");
   try {
     return await db.transaction(async (tx) => {
       await tx.execute(
