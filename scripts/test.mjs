@@ -56,7 +56,7 @@ try {
     "--wait",
     "--wait-timeout",
     "60",
-    "postgres",
+    ...(mode === "e2e" ? ["postgres", "mailpit"] : ["postgres"]),
   ]);
   const address = await run(
     "docker",
@@ -77,6 +77,30 @@ try {
     BETTER_AUTH_SECRET: randomBytes(32).toString("hex"),
     BETTER_AUTH_URL: "http://localhost:3101",
   };
+  if (mode === "e2e") {
+    const smtpAddress = await run(
+      "docker",
+      [...dockerArgs, "port", "mailpit", "1025"],
+      env,
+      true,
+    );
+    const webAddress = await run(
+      "docker",
+      [...dockerArgs, "port", "mailpit", "8025"],
+      env,
+      true,
+    );
+    const smtpPort = smtpAddress.trim().match(/^127\.0\.0\.1:(\d+)$/)?.[1];
+    const mailPort = webAddress.trim().match(/^127\.0\.0\.1:(\d+)$/)?.[1];
+    if (!smtpPort || !mailPort)
+      throw new Error("Could not determine isolated email ports.");
+    Object.assign(testEnv, {
+      SMTP_HOST: "127.0.0.1",
+      SMTP_PORT: smtpPort,
+      LOCAL_MAIL_INBOX_URL: `http://localhost:${mailPort}`,
+      STARTER_TEST_MAIL_INBOX_URL: `http://localhost:${mailPort}`,
+    });
+  }
   await run(process.execPath, ["scripts/migrate.mjs"], testEnv);
   if (mode === "unit") {
     const files = readdirSync(resolve(root, "tests"))

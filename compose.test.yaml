@@ -1,5 +1,14 @@
 # A separate disposable PostgreSQL server; never points at the app database.
 services:
+  mailpit:
+    image: axllent/mailpit@sha256:94f6b70c1436defae6799d9ac7ff0eeff9540465b842026d5cdb018f1c0234ea
+    environment:
+      MP_DATABASE: /data/mailpit.db
+    ports:
+      - "127.0.0.1::1025"
+      - "127.0.0.1::8025"
+    tmpfs:
+      - /data
   postgres:
     image: postgres:17-alpine
     environment:

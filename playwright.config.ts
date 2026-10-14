@@ -26,6 +26,10 @@ export default defineConfig({
       BETTER_AUTH_URL: "http://localhost:3101",
       DATABASE_URL: testUrl,
       MIGRATION_DATABASE_URL: testUrl,
+      SMTP_HOST: "127.0.0.1",
+      SMTP_PORT: process.env.SMTP_PORT || "1025",
+      LOCAL_MAIL_INBOX_URL:
+        process.env.STARTER_TEST_MAIL_INBOX_URL || "http://localhost:8025",
     },
     gracefulShutdown: { signal: "SIGTERM", timeout: 5000 },
   },
