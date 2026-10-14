@@ -145,7 +145,19 @@ test("the admin page renders only for a permitted role", async ({ page }) => {
   await page.getByLabel("Name").fill("Page Viewer");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill("Roles-test-password-123!");
+  const signupResponse = page.waitForResponse((response) =>
+    response.url().endsWith("/api/auth/sign-up/email"),
+  );
   await page.getByRole("button", { name: "Create account" }).click();
+  const response = await signupResponse;
+  if (response.status() === 429) {
+    const seconds = Number(response.headers()["retry-after"] || 10);
+    expect(Number.isFinite(seconds) && seconds >= 0 && seconds <= 10).toBe(
+      true,
+    );
+    await delay((seconds + 0.1) * 1000);
+    await page.getByRole("button", { name: "Create account" }).click();
+  }
   await expect(page).toHaveURL(/\/app$/);
 
   await page.goto("/admin");

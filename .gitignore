@@ -22,3 +22,5 @@ coverage/
 .vercel/
 .claude/settings.local.json
 .codex/config.local.toml
+.ngodingpakeai/pending.json
+.ngodingpakeai/summaries.json

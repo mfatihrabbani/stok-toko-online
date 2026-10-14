@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Layers2 } from "lucide-react";
+import { Boxes } from "lucide-react";
 import { siteConfig } from "@/config/site";
 
 export function Brand() {
@@ -7,17 +7,10 @@ export function Brand() {
     <Link
       to="/"
       className="inline-flex items-center gap-2.5 rounded-sm font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-      aria-label={`${siteConfig.name} home`}
+      aria-label={`${siteConfig.name} beranda`}
     >
-      <span className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">
-        <Layers2 className="size-4" aria-hidden="true" />
-      </span>
-      <span>
-        {siteConfig.name}
-        <span className="ml-2 font-normal text-muted-foreground">
-          / starter
-        </span>
-      </span>
+      <Boxes className="size-7" aria-hidden="true" />
+      <span className="text-[28px] font-bold">{siteConfig.name}</span>
     </Link>
   );
 }

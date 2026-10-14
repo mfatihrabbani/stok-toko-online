@@ -1,7 +1,7 @@
 {
   "id": "tanstack-postgres",
-  "name": "Base TanStack Postgres",
-  "description": "An AI-friendly foundation with TanStack Start, Drizzle and PostgreSQL.",
+  "name": "stok.",
+  "description": "Kelola persediaan toko online dengan lebih mudah.",
   "baseVersion": "0.1.0",
   "framework": "tanstack-start",
   "database": "postgresql"
