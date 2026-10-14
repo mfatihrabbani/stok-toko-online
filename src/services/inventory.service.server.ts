@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, gt, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db/index.server";
 import { products } from "@/db/schema/products";
 import type { ListProductsInput } from "@/validators/inventory";
@@ -16,12 +16,28 @@ export const productFields = {
 
 export async function listProducts(
   userId: string,
-  { limit, offset }: ListProductsInput,
+  { limit, offset, q, category, status }: ListProductsInput,
 ) {
   const rows = await db
     .select(productFields)
     .from(products)
-    .where(eq(products.userId, userId))
+    .where(
+      and(
+        eq(products.userId, userId),
+        q
+          ? or(
+              sql`position(lower(${q}) in lower(${products.name})) > 0`,
+              sql`position(lower(${q}) in lower(${products.sku})) > 0`,
+            )
+          : undefined,
+        category !== "all" ? eq(products.category, category) : undefined,
+        status === "empty"
+          ? eq(products.stock, 0)
+          : status === "low"
+            ? and(gt(products.stock, 0), lt(products.stock, products.minStock))
+            : undefined,
+      ),
+    )
     .orderBy(asc(products.name), asc(products.id))
     .limit(limit + 1)
     .offset(offset);
