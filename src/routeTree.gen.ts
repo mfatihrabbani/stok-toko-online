@@ -22,6 +22,7 @@ import { Route as ProtectedProductsIdRouteImport } from './routes/_protected/pro
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
+import { Route as ApiProductsIndexRouteImport } from './routes/api/products/index'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
 
@@ -88,6 +89,11 @@ const ApiNotesIdRoute = ApiNotesIdRouteImport.update({
   path: '/api/notes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProductsIndexRoute = ApiProductsIndexRouteImport.update({
+  id: '/api/products/',
+  path: '/api/products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminNotesIndexRoute = ApiAdminNotesIndexRouteImport.update({
   id: '/api/admin/notes/',
   path: '/api/admin/notes/',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/notes/': typeof ApiNotesIndexRoute
+  '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
 }
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/notes': typeof ApiNotesIndexRoute
+  '/api/products': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes': typeof ApiAdminNotesIndexRoute
 }
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/notes/': typeof ApiNotesIndexRoute
+  '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
 }
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/notes/'
+    | '/api/products/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
   fileRoutesByTo: FileRoutesByTo
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/notes'
+    | '/api/products'
     | '/api/admin/notes/$id'
     | '/api/admin/notes'
   id:
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/notes/$id'
     | '/api/notes/'
+    | '/api/products/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
   fileRoutesById: FileRoutesById
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
+  ApiProductsIndexRoute: typeof ApiProductsIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
   ApiAdminNotesIndexRoute: typeof ApiAdminNotesIndexRoute
 }
@@ -301,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNotesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/products/': {
+      id: '/api/products/'
+      path: '/api/products'
+      fullPath: '/api/products/'
+      preLoaderRoute: typeof ApiProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/notes/': {
       id: '/api/admin/notes/'
       path: '/api/admin/notes'
@@ -357,6 +377,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
+  ApiProductsIndexRoute: ApiProductsIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,
   ApiAdminNotesIndexRoute: ApiAdminNotesIndexRoute,
 }
