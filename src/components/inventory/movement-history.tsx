@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { MovementFiltersBar } from "@/components/inventory/movement-filters";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +16,8 @@ import {
 import { formatNumber } from "@/lib/inventory";
 import {
   demoMovements,
+  defaultMovementFilters,
+  filterMovements,
   formatDateTime,
   type StockMovement,
 } from "@/lib/movements";
@@ -30,7 +34,8 @@ export function MovementHistory({
 }: {
   initialMovements?: StockMovement[];
 }) {
-  const movements = [...initialMovements].sort(
+  const [filters, setFilters] = useState(defaultMovementFilters);
+  const movements = filterMovements(initialMovements, filters).sort(
     (a, b) =>
       b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id),
   );
@@ -62,15 +67,24 @@ export function MovementHistory({
           <p className="text-xs text-muted-foreground">
             Data contoh untuk pratinjau riwayat.
           </p>
+          <MovementFiltersBar filters={filters} onChange={setFilters} />
+          <p role="status" className="text-xs text-muted-foreground">
+            {movements.length} catatan ditemukan · Waktu Indonesia Barat
+          </p>
         </CardHeader>
         <CardContent className="px-0">
           {!movements.length ? (
             <Empty className="min-h-64">
               <EmptyHeader>
-                <EmptyTitle>Belum ada pergerakan stok</EmptyTitle>
+                <EmptyTitle>
+                  {initialMovements.length
+                    ? "Tidak ada catatan yang cocok"
+                    : "Belum ada pergerakan stok"}
+                </EmptyTitle>
                 <EmptyDescription>
-                  Catat barang masuk atau keluar. Setiap perubahan stok akan
-                  muncul di sini.
+                  {initialMovements.length
+                    ? "Ubah rentang tanggal, pencarian, atau jenis pergerakan."
+                    : "Catat barang masuk atau keluar. Setiap perubahan stok akan muncul di sini."}
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

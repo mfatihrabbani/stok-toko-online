@@ -54,3 +54,35 @@ export const formatDateTime = (value: string) =>
     dateStyle: "medium",
     timeStyle: "short",
   });
+export interface MovementFilters {
+  q: string;
+  from: string;
+  to: string;
+  direction: "all" | "in" | "out";
+}
+export const defaultMovementFilters: MovementFilters = {
+  q: "",
+  from: "",
+  to: "",
+  direction: "all",
+};
+export function filterMovements(
+  rows: StockMovement[],
+  filters: MovementFilters,
+) {
+  if (filters.from && filters.to && filters.from > filters.to) return [];
+  const query = filters.q.trim().toLocaleLowerCase("id-ID");
+  return rows.filter((row) => {
+    const date = new Date(Date.parse(row.createdAt) + 7 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    return (
+      (!filters.from || date >= filters.from) &&
+      (!filters.to || date <= filters.to) &&
+      (filters.direction === "all" || filters.direction === row.direction) &&
+      `${row.productName} ${row.productSku} ${row.note}`
+        .toLocaleLowerCase("id-ID")
+        .includes(query)
+    );
+  });
+}
