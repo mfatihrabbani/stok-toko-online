@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   Package,
   History,
+  TriangleAlert,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -76,6 +77,14 @@ function ProtectedLayout() {
             >
               <History aria-hidden="true" />
               Riwayat
+            </Link>
+            <Link
+              to="/peringatan"
+              className="stock-nav-link"
+              activeProps={{ "aria-current": "page" }}
+            >
+              <TriangleAlert aria-hidden="true" />
+              Peringatan
             </Link>
           </div>
         </nav>
