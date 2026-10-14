@@ -7,6 +7,7 @@ import * as schema from "@/db/schema";
 import { siteConfig } from "@/config/site";
 import { env } from "@/lib/env.server";
 import { ac, ADMIN_ROLES, DEFAULT_ROLE, roles } from "@/lib/permissions";
+import { sendPasswordRecovery } from "@/services/email.service.server";
 
 export const auth = betterAuth({
   appName: siteConfig.name,
@@ -18,7 +19,13 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     maxPasswordLength: 128,
-    // Add an email provider before enabling verification or password recovery.
+    sendResetPassword: async ({ user, url }) => {
+      void sendPasswordRecovery(user.email, url).catch(() =>
+        console.error(
+          "Email pemulihan belum terkirim. Periksa layanan email lokal atau pengaturan SMTP.",
+        ),
+      );
+    },
     requireEmailVerification: false,
   },
   plugins: [

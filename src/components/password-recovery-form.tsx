@@ -16,10 +16,12 @@ export function PasswordRecoveryForm({
   mode,
   token,
   invalidToken,
+  inboxUrl,
 }: {
   mode: "request" | "reset";
   token?: string;
   invalidToken?: boolean;
+  inboxUrl?: string;
 }) {
   const resetting = mode === "reset";
   const [pending, setPending] = useState(false);
@@ -87,6 +89,20 @@ export function PasswordRecoveryForm({
           ? "Gunakan kata sandi baru yang belum dipakai pada layanan lain."
           : "Isi email akun toko untuk mendapatkan tautan pemulihan."}
       </p>
+      {!resetting && inboxUrl && (
+        <p className="mt-4 rounded-md bg-muted p-3 text-sm leading-6 text-muted-foreground">
+          Email pemulihan aplikasi lokal masuk ke{" "}
+          <a
+            className="text-foreground underline underline-offset-4"
+            href={inboxUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            kotak masuk lokal
+          </a>
+          . Buka kotak masuk itu setelah mengirim permintaan.
+        </p>
+      )}
       {unavailable ? (
         <p role="alert" className="mt-6 text-sm text-destructive">
           Tautan pemulihan tidak berlaku. Minta tautan baru melalui halaman lupa

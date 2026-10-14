@@ -9,3 +9,5 @@ Keluar mengakhiri sesi; produk dan riwayat tetap tersimpan. Halaman serta API pe
 `POST /api/auth/sign-up/email` memvalidasi nama, email, dan kata sandi pada server, lalu menyerahkan pembuatan akun serta cookie kepada Better Auth. Nama dan email dirapikan, nama dibatasi 100 karakter, dan permintaan dari origin lain ditolak. Respons auth tidak boleh disimpan cache.
 
 `POST /api/auth/sign-in/email` memeriksa kata sandi melalui Better Auth dan menerbitkan cookie sesi HttpOnly. `POST /api/auth/sign-out` mengakhiri sesi tersebut pada server dan menghapus cookie. Tombol Keluar memuat ulang konteks router sebelum membuka halaman masuk; panggilan API persediaan berikutnya menolak sesi yang sudah diakhiri.
+
+Pemulihan akun lokal memakai Mailpit. `npm run dev` menyiapkan layanan email secara otomatis; `npm run mail:up` menyalakannya secara terpisah. Buka tautan **kotak masuk lokal** pada halaman lupa kata sandi untuk membaca email pemulihan. Email ditampung di komputer ini dan tidak dikirim ke inbox Gmail atau layanan email pribadi. Pengaturan SMTP yang sudah disediakan dipertahankan.

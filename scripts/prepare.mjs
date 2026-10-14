@@ -5,6 +5,7 @@ try {
   await prepareEnvironment();
   runNpm(["run", "db:up"]);
   runNpm(["run", "db:migrate"]);
+  runNpm(["run", "mail:up"]);
 } catch (error) {
   console.error(`Setup needs attention: ${error.message}`);
   process.exitCode = 1;
