@@ -29,6 +29,7 @@ export const products = pgTable(
       .notNull(),
     categoryId: uuid("category_id"),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
+    restockHandledAt: timestamp("restock_handled_at", { withTimezone: true }),
     stock: integer("stock").default(0).notNull(),
     minStock: integer("min_stock").default(0).notNull(),
     unit: varchar("unit", { length: 30 }).default("unit").notNull(),

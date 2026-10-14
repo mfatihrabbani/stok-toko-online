@@ -18,6 +18,7 @@ export const productFields = {
   stock: products.stock,
   minStock: products.minStock,
   lowStock: sql<boolean>`${products.stock} < ${products.minStock}`,
+  restockHandled: sql<boolean>`${products.restockHandledAt} IS NOT NULL`,
   unit: products.unit,
   updatedAt: products.updatedAt,
 };
@@ -187,7 +188,11 @@ export async function updateProduct(
           : await resolveCategory(tx, userId, input.category);
       const [row] = await tx
         .update(products)
-        .set({ ...input, ...category })
+        .set({
+          ...input,
+          ...category,
+          restockHandledAt: sql`CASE WHEN ${products.stock} >= ${input.minStock ?? products.minStock} THEN NULL ELSE ${products.restockHandledAt} END`,
+        })
         .where(and(eq(products.id, id), activeOwner(userId)))
         .returning(productFields);
       if (!row)
@@ -304,7 +309,10 @@ async function recordMovement(
         );
       const [updated] = await tx
         .update(products)
-        .set({ stock: after })
+        .set({
+          stock: after,
+          ...(after >= product.minStock ? { restockHandledAt: null } : {}),
+        })
         .where(and(eq(products.id, product.id), activeOwner(userId)))
         .returning(productFields);
       const [movement] = await tx

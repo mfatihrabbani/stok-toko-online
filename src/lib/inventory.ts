@@ -1,5 +1,6 @@
 export interface Product {
   lowStock?: boolean;
+  restockHandled?: boolean;
   id: string;
   name: string;
   sku: string;

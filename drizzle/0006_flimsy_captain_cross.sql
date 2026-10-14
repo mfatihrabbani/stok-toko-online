@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "restock_handled_at" timestamp with time zone;

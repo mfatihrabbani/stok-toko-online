@@ -43,6 +43,13 @@
       "when": 1791994489311,
       "tag": "0005_many_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791996403513,
+      "tag": "0006_flimsy_captain_cross",
+      "breakpoints": true
     }
   ]
 }
