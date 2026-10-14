@@ -127,10 +127,14 @@ export function StockEntryForm({
     const nextErrors: typeof errors = {};
     if (!product) nextErrors.product = "Pilih produk sebelum melanjutkan.";
     if (!quantity.trim())
-      nextErrors.quantity = "Masukkan jumlah barang yang diterima.";
+      nextErrors.quantity = outgoing
+        ? "Masukkan jumlah barang yang keluar."
+        : "Masukkan jumlah barang yang diterima.";
     else if (!Number.isSafeInteger(amount) || amount < 1)
       nextErrors.quantity = "Gunakan bilangan bulat, minimal 1.";
-    else if (amount > 2147483647 - (product?.stock ?? 0))
+    else if (outgoing && amount > (product?.stock ?? 0))
+      nextErrors.quantity = `Jumlah keluar melebihi stok. Tersedia ${formatNumber(product?.stock ?? 0)} unit.`;
+    else if (!outgoing && amount > 2147483647 - (product?.stock ?? 0))
       nextErrors.quantity = `Jumlah terlalu besar. Maksimal ${formatNumber(2147483647 - (product?.stock ?? 0))} unit.`;
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
@@ -287,7 +291,9 @@ export function StockEntryForm({
                   required
                 />
                 <FieldDescription id="entry-quantity-hint">
-                  Gunakan bilangan bulat, minimal 1.
+                  {outgoing
+                    ? `Gunakan bilangan bulat, minimal 1 dan maksimal ${formatNumber(product?.stock ?? 0)} unit.`
+                    : "Gunakan bilangan bulat, minimal 1."}
                 </FieldDescription>
                 {errors.quantity && (
                   <FieldError id="entry-quantity-error">
