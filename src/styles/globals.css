@@ -359,3 +359,47 @@
     min-height: 44px;
   }
 }
+.stock-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.stock-kpi-value {
+  display: block;
+  margin-block-end: 8px;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.stock-kpi-chart {
+  width: 112px;
+  height: 72px;
+  min-width: 0;
+}
+.stock-kpi-ring {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+@media (max-width: 1100px) {
+  .stock-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .stock-summary {
+    gap: 12px;
+  }
+  .stock-summary [data-slot="card-content"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .stock-kpi-value {
+    font-size: 32px;
+  }
+  .stock-kpi-chart {
+    width: 100%;
+  }
+}

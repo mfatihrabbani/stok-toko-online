@@ -26,6 +26,12 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
   await expect(
     page.getByRole("heading", { name: "Stok barang", exact: true }),
   ).toBeVisible();
+  const summary = page.getByRole("region", { name: "Ringkasan persediaan" });
+  await expect(
+    summary.getByRole("heading", { name: "Total produk" }),
+  ).toBeVisible();
+  await expect(summary).toContainText("356");
+  await expect(summary).toContainText("25%");
   await expect(
     page.getByRole("cell", { name: "Canvas Tote Bag ACC-001" }),
   ).toBeVisible();

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { StockTable } from "@/components/inventory/stock-table";
 import { StockFilters } from "@/components/inventory/stock-filters";
+import { StockSummary } from "@/components/inventory/stock-summary";
 import {
   defaultProductFilters,
   demoProducts,
@@ -40,6 +41,7 @@ function StockPage() {
           Periksa persediaan, lalu catat barang yang masuk dan keluar.
         </p>
       </header>
+      <StockSummary products={demoProducts} />
       <Card className="gap-0 overflow-hidden shadow-none">
         <CardHeader className="pb-5">
           <CardTitle>
