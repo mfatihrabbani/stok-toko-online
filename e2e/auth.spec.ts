@@ -55,6 +55,10 @@ test("signup, persisted session, signout, rejected password, and signin work", a
   await expect(page).toHaveURL(/\/app$/);
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
+  expect((await page.request.get("/api/products")).status()).toBe(401);
+  expect(
+    await (await page.request.get("/api/auth/get-session")).json(),
+  ).toBeNull();
   await page.goto("/app");
   await expect(page).toHaveURL(/\/sign-in$/);
   await page.getByLabel("Email", { exact: true }).fill(email);

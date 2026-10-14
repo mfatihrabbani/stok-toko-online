@@ -7,3 +7,5 @@ Starter sudah memiliki tabel Better Auth `user`, `account`, `session`, dan `veri
 Keluar mengakhiri sesi; produk dan riwayat tetap tersimpan. Halaman serta API persediaan memerlukan sesi yang masih berlaku dan menyaring data berdasarkan akun pemilik. Tautan lupa kata sandi berada di halaman masuk.
 
 `POST /api/auth/sign-up/email` memvalidasi nama, email, dan kata sandi pada server, lalu menyerahkan pembuatan akun serta cookie kepada Better Auth. Nama dan email dirapikan, nama dibatasi 100 karakter, dan permintaan dari origin lain ditolak. Respons auth tidak boleh disimpan cache.
+
+`POST /api/auth/sign-in/email` memeriksa kata sandi melalui Better Auth dan menerbitkan cookie sesi HttpOnly. `POST /api/auth/sign-out` mengakhiri sesi tersebut pada server dan menghapus cookie. Tombol Keluar memuat ulang konteks router sebelum membuka halaman masuk; panggilan API persediaan berikutnya menolak sesi yang sudah diakhiri.
