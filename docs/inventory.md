@@ -9,3 +9,5 @@ Produk toko disimpan di `products`. Akun baru mulai tanpa produk; data contoh de
 Barang keluar menggunakan tabel dan migrasi yang sama, dengan `direction = out`. Constraint keseimbangan mewajibkan stok akhir sama dengan stok awal dikurangi jumlah keluar, dan menolak nilai negatif. Tidak ada tabel pengeluaran kedua atau penghapusan migrasi sebelumnya.
 
 Pemilih produk pada barang masuk memakai daftar milik akun yang dimuat dari server. Pencarian nama atau SKU juga tersedia lewat `/api/products?q=teks&limit=100&offset=0`; kategori dan kondisi stok dapat digabungkan. Input pencarian menjadi parameter SQL, bukan potongan query. SKU/nama yang mengandung tanda persen atau garis bawah tetap dicari sebagai teks biasa.
+
+Barang keluar memakai kontrak daftar/pencarian yang sama. Pemilih tetap menampilkan produk habis beserta jumlah tersedia agar pengguna memahami mengapa produk itu belum dapat dikeluarkan. Produk baru di form masuk tetap berupa draf sampai konfirmasi tersimpan.

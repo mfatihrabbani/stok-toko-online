@@ -28,6 +28,7 @@ import {
   defaultProductFilters,
   filterProducts,
   formatNumber,
+  type Product,
 } from "@/lib/inventory";
 import type { StockSearch } from "@/lib/stock-search";
 import { useInventory } from "@/lib/use-inventory";
@@ -44,7 +45,16 @@ export function StockEntryForm({
 }) {
   const outgoing = direction === "out";
   const { products: savedProducts, refresh } = useInventory();
-  const [products, setProducts] = useState(savedProducts);
+  const [overrides, setProducts] = useState<Product[]>([]);
+  const products = [
+    ...savedProducts.map(
+      (item) => overrides.find((local) => local.id === item.id) ?? item,
+    ),
+    ...overrides.filter(
+      (item) => !savedProducts.some((saved) => saved.id === item.id),
+    ),
+  ];
+  const draftIdsRef = useRef(new Set<string>());
   const [addingProduct, setAddingProduct] = useState(false);
   const [productId, setProductId] = useState(
     initialProductId && products.some((item) => item.id === initialProductId)
@@ -103,7 +113,7 @@ export function StockEntryForm({
     try {
       if (!product || !valid)
         throw new Error("Periksa kembali produk dan jumlah barang.");
-      const newProduct = !savedProducts.some((item) => item.id === product.id)
+      const newProduct = draftIdsRef.current.has(product.id)
         ? {
             name: product.name,
             sku: product.sku,
@@ -124,9 +134,13 @@ export function StockEntryForm({
         outgoing ? "/api/stock/outgoing" : "/api/stock/incoming",
         { method: "POST", body: { ...body, requestId: requestRef.current.id } },
       );
-      setProducts((current) =>
-        current.map((item) => (item.id === product.id ? result.product : item)),
-      );
+      setProducts((current) => [
+        ...current.filter(
+          (item) => item.id !== product.id && item.id !== result.product.id,
+        ),
+        result.product,
+      ]);
+      draftIdsRef.current.delete(product.id);
       setProductId(result.product.id);
       setFeedback({
         kind: "success",
@@ -282,6 +296,7 @@ export function StockEntryForm({
                   products={products}
                   onCancel={() => setAddingProduct(false)}
                   onCreate={(created) => {
+                    draftIdsRef.current.add(created.id);
                     setProducts((current) => [...current, created]);
                     setProductId(created.id);
                     setProductQuery("");
