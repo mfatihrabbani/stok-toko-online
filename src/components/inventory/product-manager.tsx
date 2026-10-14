@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { StockStatus } from "@/components/inventory/stock-status";
+import { ProductEditor } from "@/components/inventory/product-editor";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,9 +24,38 @@ import {
 import { demoProducts, formatNumber, type Product } from "@/lib/inventory";
 
 export function ProductManager() {
-  const [products] = useState<Product[]>(demoProducts);
+  const [products, setProducts] = useState<Product[]>(demoProducts);
+  const [creating, setCreating] = useState(false);
+  const [message, setMessage] = useState("");
   return (
     <div className="flex flex-col gap-6">
+      <Dialog open={creating} onOpenChange={setCreating}>
+        <DialogContent className="max-h-[calc(100dvh-32px)] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tambah produk</DialogTitle>
+            <DialogDescription>
+              Isi identitas produk dan stok awal.
+            </DialogDescription>
+          </DialogHeader>
+          <ProductEditor
+            products={products}
+            onCancel={() => setCreating(false)}
+            onSave={(product) => {
+              setProducts((current) => [...current, product]);
+              setCreating(false);
+              setMessage(`${product.name} ditambahkan ke data contoh.`);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+      {message && (
+        <p
+          role="status"
+          className="rounded-md bg-success-soft p-3 text-sm text-success"
+        >
+          {message}
+        </p>
+      )}
       <header>
         <h1 className="text-[28px] font-semibold tracking-tight sm:text-[40px]">
           Produk
@@ -27,6 +66,10 @@ export function ProductManager() {
       </header>
       <Card className="shadow-none">
         <CardHeader>
+          <Button className="w-fit self-end" onClick={() => setCreating(true)}>
+            <Plus data-icon="inline-start" aria-hidden="true" />
+            Tambah produk
+          </Button>
           <CardTitle>
             <h2 className="flex items-center gap-3 text-xl">
               Semua produk <Badge variant="outline">{products.length}</Badge>
