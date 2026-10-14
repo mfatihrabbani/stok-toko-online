@@ -10,6 +10,7 @@ export function SignOutButton() {
   const router = useRouter();
   const navigate = useNavigate();
   async function signOut() {
+    if (pending) return;
     setPending(true);
     setError(false);
     try {
@@ -27,12 +28,18 @@ export function SignOutButton() {
     <div className="flex flex-wrap items-center gap-2">
       {error && (
         <p role="alert" className="text-sm text-destructive">
-          Couldn’t sign out. Try again.
+          Belum berhasil keluar. Coba lagi.
         </p>
       )}
-      <Button onClick={signOut} disabled={pending} variant="outline" size="sm">
-        <LogOut aria-hidden="true" />
-        {pending ? "Signing out…" : "Sign out"}
+      <Button
+        onClick={signOut}
+        disabled={pending}
+        variant="outline"
+        size="sm"
+        aria-busy={pending}
+      >
+        <LogOut data-icon="inline-start" aria-hidden="true" />
+        {pending ? "Sedang keluar..." : "Keluar"}
       </Button>
     </div>
   );
