@@ -22,6 +22,44 @@ export const productFields = {
   unit: products.unit,
   updatedAt: products.updatedAt,
 };
+export async function listLowStock(
+  userId: string,
+  input: import("zod").infer<
+    typeof import("@/validators/inventory").lowStockQuerySchema
+  >,
+) {
+  const rows = await db
+    .select({
+      ...productFields,
+      shortfall: sql<number>`${products.minStock} - ${products.stock}`,
+    })
+    .from(products)
+    .where(
+      and(
+        activeOwner(userId),
+        lt(products.stock, products.minStock),
+        input.status === "active"
+          ? isNull(products.restockHandledAt)
+          : input.status === "handled"
+            ? sql`${products.restockHandledAt} IS NOT NULL`
+            : undefined,
+      ),
+    )
+    .orderBy(
+      asc(sql`${products.stock}::numeric / nullif(${products.minStock}, 0)`),
+      desc(sql`${products.minStock} - ${products.stock}`),
+      asc(products.name),
+      asc(products.id),
+    )
+    .limit(input.limit + 1)
+    .offset(input.offset);
+  return {
+    data: rows
+      .slice(0, input.limit)
+      .map((row) => ({ ...row, updatedAt: row.updatedAt.toISOString() })),
+    meta: { ...input, hasMore: rows.length > input.limit },
+  };
+}
 export const movementFields = {
   id: stockMovements.id,
   productId: stockMovements.productId,

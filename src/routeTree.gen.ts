@@ -31,6 +31,7 @@ import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
 import { Route as ApiProductsIndexRouteImport } from './routes/api/products/index'
 import { Route as ApiProductsIdRouteImport } from './routes/api/products/$id'
+import { Route as ApiProductsLowStockRouteImport } from './routes/api/products/low-stock'
 import { Route as ApiProductsSummaryRouteImport } from './routes/api/products/summary'
 import { Route as ApiStockIncomingRouteImport } from './routes/api/stock/incoming'
 import { Route as ApiStockOutgoingRouteImport } from './routes/api/stock/outgoing'
@@ -147,6 +148,11 @@ const ApiProductsIdRoute = ApiProductsIdRouteImport.update({
   path: '/api/products/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProductsLowStockRoute = ApiProductsLowStockRouteImport.update({
+  id: '/api/products/low-stock',
+  path: '/api/products/low-stock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProductsSummaryRoute = ApiProductsSummaryRouteImport.update({
   id: '/api/products/summary',
   path: '/api/products/summary',
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
+  '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
+  '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
@@ -262,6 +270,7 @@ export interface FileRoutesById {
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
+  '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
@@ -293,6 +302,7 @@ export interface FileRouteTypes {
     | '/api/categories/$id'
     | '/api/notes/$id'
     | '/api/products/$id'
+    | '/api/products/low-stock'
     | '/api/products/summary'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/api/categories/$id'
     | '/api/notes/$id'
     | '/api/products/$id'
+    | '/api/products/low-stock'
     | '/api/products/summary'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
@@ -353,6 +364,7 @@ export interface FileRouteTypes {
     | '/api/categories/$id'
     | '/api/notes/$id'
     | '/api/products/$id'
+    | '/api/products/low-stock'
     | '/api/products/summary'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
@@ -373,6 +385,7 @@ export interface RootRouteChildren {
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
   ApiProductsIdRoute: typeof ApiProductsIdRoute
+  ApiProductsLowStockRoute: typeof ApiProductsLowStockRoute
   ApiProductsSummaryRoute: typeof ApiProductsSummaryRoute
   ApiStockIncomingRoute: typeof ApiStockIncomingRoute
   ApiStockOutgoingRoute: typeof ApiStockOutgoingRoute
@@ -541,6 +554,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProductsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/products/low-stock': {
+      id: '/api/products/low-stock'
+      path: '/api/products/low-stock'
+      fullPath: '/api/products/low-stock'
+      preLoaderRoute: typeof ApiProductsLowStockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/products/summary': {
       id: '/api/products/summary'
       path: '/api/products/summary'
@@ -643,6 +663,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
   ApiProductsIdRoute: ApiProductsIdRoute,
+  ApiProductsLowStockRoute: ApiProductsLowStockRoute,
   ApiProductsSummaryRoute: ApiProductsSummaryRoute,
   ApiStockIncomingRoute: ApiStockIncomingRoute,
   ApiStockOutgoingRoute: ApiStockOutgoingRoute,
