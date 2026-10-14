@@ -428,6 +428,15 @@
 .stock-entry [data-slot="field"] {
   min-width: 0;
 }
+@media (max-width: 780px) {
+  .stock-table .product-manage-cell {
+    grid-column: 1 / -1;
+  }
+  .product-manage-cell [data-slot="button"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
 .stock-entry [role="status"],
 .stock-entry [role="alert"] {
   overflow-wrap: anywhere;

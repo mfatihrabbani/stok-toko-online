@@ -7,9 +7,10 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
+  DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,25 +28,84 @@ export function ProductManager() {
   const [products, setProducts] = useState<Product[]>(demoProducts);
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
+  const [editing, setEditing] = useState<Product>();
+  const [deleting, setDeleting] = useState<Product>();
+  const closeEditor = () => {
+    setCreating(false);
+    setEditing(undefined);
+  };
   return (
     <div className="flex flex-col gap-6">
-      <Dialog open={creating} onOpenChange={setCreating}>
+      <Dialog
+        open={creating || Boolean(editing)}
+        onOpenChange={(open) => {
+          if (!open) closeEditor();
+        }}
+      >
         <DialogContent className="max-h-[calc(100dvh-32px)] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Tambah produk</DialogTitle>
+            <DialogTitle>
+              {editing ? "Ubah produk" : "Tambah produk"}
+            </DialogTitle>
             <DialogDescription>
-              Isi identitas produk dan stok awal.
+              {editing
+                ? "Ubah identitas dan batas stok. Catat perubahan jumlah melalui barang masuk atau keluar."
+                : "Isi identitas produk dan stok awal."}
             </DialogDescription>
           </DialogHeader>
           <ProductEditor
             products={products}
-            onCancel={() => setCreating(false)}
+            key={editing?.id ?? "new"}
+            initialProduct={editing}
+            onCancel={closeEditor}
             onSave={(product) => {
-              setProducts((current) => [...current, product]);
-              setCreating(false);
-              setMessage(`${product.name} ditambahkan ke data contoh.`);
+              setProducts((current) =>
+                editing
+                  ? current.map((item) =>
+                      item.id === product.id ? product : item,
+                    )
+                  : [...current, product],
+              );
+              closeEditor();
+              setMessage(
+                `${product.name} ${editing ? "diperbarui" : "ditambahkan"} pada data contoh.`,
+              );
             }}
           />
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={Boolean(deleting)}
+        onOpenChange={(open) => {
+          if (!open) setDeleting(undefined);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Hapus produk?</DialogTitle>
+            <DialogDescription>
+              {deleting?.name} akan dihapus dari daftar produk. Periksa kembali
+              sebelum melanjutkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(undefined)}>
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (!deleting) return;
+                setProducts((current) =>
+                  current.filter((item) => item.id !== deleting.id),
+                );
+                setMessage(`${deleting.name} dihapus dari data contoh.`);
+                setDeleting(undefined);
+              }}
+            >
+              Hapus produk
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       {message && (
@@ -91,6 +151,7 @@ export function ProductManager() {
                 <TableHead>Stok</TableHead>
                 <TableHead>Minimal</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Kelola</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -113,6 +174,26 @@ export function ProductManager() {
                   </TableCell>
                   <TableCell className="status-cell">
                     <StockStatus product={product} />
+                  </TableCell>
+                  <TableCell className="product-manage-cell">
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label={`Ubah ${product.name}`}
+                        onClick={() => setEditing(product)}
+                      >
+                        <Pencil aria-hidden="true" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label={`Hapus ${product.name}`}
+                        onClick={() => setDeleting(product)}
+                      >
+                        <Trash2 aria-hidden="true" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

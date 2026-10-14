@@ -15,15 +15,19 @@ export function NewProductFields({
   products,
   onCreate,
   onCancel,
+  initialProduct,
+  submitLabel = "Gunakan produk",
 }: {
   products: Product[];
   onCreate: (product: Product) => void;
   onCancel: () => void;
+  initialProduct?: Product;
+  submitLabel?: string;
 }) {
-  const [name, setName] = useState("");
-  const [sku, setSku] = useState("");
-  const [category, setCategory] = useState("");
-  const [minimum, setMinimum] = useState("0");
+  const [name, setName] = useState(initialProduct?.name ?? "");
+  const [sku, setSku] = useState(initialProduct?.sku ?? "");
+  const [category, setCategory] = useState(initialProduct?.category ?? "");
+  const [minimum, setMinimum] = useState(String(initialProduct?.minStock ?? 0));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const nameRef = useRef<HTMLInputElement>(null);
   const skuRef = useRef<HTMLInputElement>(null);
@@ -37,7 +41,9 @@ export function NewProductFields({
     else if (
       sku.trim() &&
       products.some(
-        (product) => product.sku.toLowerCase() === sku.trim().toLowerCase(),
+        (product) =>
+          product.id !== initialProduct?.id &&
+          product.sku.toLowerCase() === sku.trim().toLowerCase(),
       )
     )
       next.sku = "SKU sudah digunakan. Gunakan kode lain.";
@@ -54,19 +60,21 @@ export function NewProductFields({
       return;
     }
     onCreate({
-      id: crypto.randomUUID(),
+      id: initialProduct?.id ?? crypto.randomUUID(),
       name: name.trim(),
       sku: sku.trim(),
       category: category.trim() || "Tanpa kategori",
-      stock: 0,
+      stock: initialProduct?.stock ?? 0,
       minStock,
-      unit: "unit",
+      unit: initialProduct?.unit ?? "unit",
       updatedAt: new Date().toISOString(),
     });
   }
   return (
     <FieldSet className="rounded-md border bg-muted/50 p-4">
-      <FieldLegend>Produk baru</FieldLegend>
+      <FieldLegend>
+        {initialProduct ? "Data produk" : "Produk baru"}
+      </FieldLegend>
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.name)} className="gap-2">
           <FieldLabel htmlFor="new-product-name">Nama produk</FieldLabel>
@@ -143,7 +151,7 @@ export function NewProductFields({
       </FieldGroup>
       <div className="flex flex-wrap gap-3">
         <Button type="button" onClick={create}>
-          Gunakan produk
+          {submitLabel}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
           Batal tambah produk

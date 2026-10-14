@@ -13,45 +13,51 @@ export function ProductEditor({
   products,
   onSave,
   onCancel,
+  initialProduct,
 }: {
   products: Product[];
   onSave: (product: Product) => void;
   onCancel: () => void;
+  initialProduct?: Product;
 }) {
   const [stock, setStock] = useState("0");
   const [error, setError] = useState("");
   const stockRef = useRef<HTMLInputElement>(null);
   return (
     <div className="stock-entry flex flex-col gap-5">
-      <Field data-invalid={Boolean(error)}>
-        <FieldLabel htmlFor="product-initial-stock">Stok awal</FieldLabel>
-        <Input
-          id="product-initial-stock"
-          ref={stockRef}
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={2147483647}
-          step={1}
-          value={stock}
-          onChange={(event) => {
-            setStock(event.target.value);
-            setError("");
-          }}
-          aria-invalid={Boolean(error)}
-          aria-describedby="product-stock-help"
-        />
-        <FieldDescription id="product-stock-help">
-          Isi 0 bila produk belum memiliki stok. Stok awal tercatat sebagai
-          barang masuk.
-        </FieldDescription>
-        {error && <FieldError>{error}</FieldError>}
-      </Field>
+      {!initialProduct && (
+        <Field data-invalid={Boolean(error)}>
+          <FieldLabel htmlFor="product-initial-stock">Stok awal</FieldLabel>
+          <Input
+            id="product-initial-stock"
+            ref={stockRef}
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={2147483647}
+            step={1}
+            value={stock}
+            onChange={(event) => {
+              setStock(event.target.value);
+              setError("");
+            }}
+            aria-invalid={Boolean(error)}
+            aria-describedby="product-stock-help"
+          />
+          <FieldDescription id="product-stock-help">
+            Isi 0 bila produk belum memiliki stok. Stok awal tercatat sebagai
+            barang masuk.
+          </FieldDescription>
+          {error && <FieldError>{error}</FieldError>}
+        </Field>
+      )}
       <NewProductFields
         products={products}
+        initialProduct={initialProduct}
+        submitLabel={initialProduct ? "Simpan perubahan" : "Simpan produk"}
         onCancel={onCancel}
         onCreate={(created) => {
-          const amount = Number(stock);
+          const amount = initialProduct?.stock ?? Number(stock);
           if (
             !stock.trim() ||
             !Number.isSafeInteger(amount) ||
