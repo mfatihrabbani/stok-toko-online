@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowDownLeft, ArrowLeft, PackageX } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ArrowLeft, PackageX } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -84,7 +84,16 @@ function ProductDetailPage() {
               </div>
             </dl>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-wrap gap-3">
+            <Button variant="outline" asChild>
+              <Link
+                to="/barang-keluar"
+                search={{ ...search, product: product.id }}
+              >
+                <ArrowUpRight data-icon="inline-start" aria-hidden="true" />
+                Catat keluar
+              </Link>
+            </Button>
             <Button asChild>
               <Link
                 to="/barang-masuk"

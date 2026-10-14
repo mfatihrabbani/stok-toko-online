@@ -183,7 +183,7 @@ export function StockEntryForm({
                   {productQuery
                     ? matches.length
                       ? `${matches.length} produk cocok. Pilih produk di bawah.`
-                      : "Produk tidak ditemukan. Ubah pencarian."
+                      : "Produk tidak ditemukan. Ubah pencarian nama atau SKU."
                     : ""}
                 </FieldDescription>
               </Field>
@@ -234,6 +234,8 @@ export function StockEntryForm({
                 {product && (
                   <FieldDescription>
                     {product.sku || "Tanpa SKU"} · {product.category}
+                    {outgoing &&
+                      ` · Tersedia ${formatNumber(product.stock)} ${product.unit}`}
                   </FieldDescription>
                 )}
               </Field>
