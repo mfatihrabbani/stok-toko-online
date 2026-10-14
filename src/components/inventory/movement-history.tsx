@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
+import { MovementDetail } from "@/components/inventory/movement-detail";
 import { MovementFiltersBar } from "@/components/inventory/movement-filters";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,12 +37,19 @@ export function MovementHistory({
   initialMovements?: StockMovement[];
 }) {
   const [filters, setFilters] = useState(defaultMovementFilters);
+  const [selected, setSelected] = useState<StockMovement>();
+  const detailTrigger = useRef<HTMLButtonElement | null>(null);
   const movements = filterMovements(initialMovements, filters).sort(
     (a, b) =>
       b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id),
   );
   return (
     <div className="flex flex-col gap-6">
+      <MovementDetail
+        movement={selected}
+        onClose={() => setSelected(undefined)}
+        onCloseFocus={() => detailTrigger.current?.focus()}
+      />
       <header>
         <h1 className="text-[28px] font-semibold tracking-tight sm:text-[40px]">
           Riwayat Pergerakan
@@ -105,6 +114,7 @@ export function MovementHistory({
                   <TableHead>Jumlah</TableHead>
                   <TableHead>Waktu</TableHead>
                   <TableHead>Catatan</TableHead>
+                  <TableHead>Detail</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -142,6 +152,19 @@ export function MovementHistory({
                       className="max-w-60 whitespace-normal break-words"
                     >
                       {item.note || "Tanpa catatan"}
+                    </TableCell>
+                    <TableCell className="action-cell">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label={`Detail catatan ${item.productName}, ${formatDateTime(item.createdAt)}`}
+                        onClick={(event) => {
+                          detailTrigger.current = event.currentTarget;
+                          setSelected(item);
+                        }}
+                      >
+                        <ArrowUpRight aria-hidden="true" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
