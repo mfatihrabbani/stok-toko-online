@@ -1,6 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, PackageX } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowDownLeft, ArrowLeft, PackageX } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Empty,
   EmptyContent,
@@ -78,6 +84,17 @@ function ProductDetailPage() {
               </div>
             </dl>
           </CardContent>
+          <CardFooter>
+            <Button asChild>
+              <Link
+                to="/barang-masuk"
+                search={{ ...search, product: product.id }}
+              >
+                <ArrowDownLeft data-icon="inline-start" aria-hidden="true" />
+                Catat masuk
+              </Link>
+            </Button>
+          </CardFooter>
         </Card>
         <Card className="shadow-none">
           <CardHeader>

@@ -140,6 +140,22 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
     page.getByRole("heading", { name: "Barang masuk", exact: true }),
   ).toBeVisible();
   await page.getByLabel("Jumlah masuk", { exact: true }).fill("10");
+  await page.goto("/products/3");
+  await page.getByRole("link", { name: "Catat masuk", exact: true }).click();
+  await expect(page.getByLabel("Produk", { exact: true })).toHaveValue("3");
+  await page.goto("/barang-masuk");
+  await page.getByLabel("Jumlah masuk", { exact: true }).fill("10");
+  await page.getByLabel("Cari produk", { exact: true }).fill("prl-001");
+  await page.getByLabel("Produk", { exact: true }).selectOption("3");
+  await expect(
+    page.getByRole("complementary", { name: "Ringkasan barang masuk" }),
+  ).toContainText("16 unit");
+  await page
+    .getByLabel("Cari produk", { exact: true })
+    .fill("Produk yang tidak ada");
+  await expect(page.getByLabel("Produk", { exact: true })).toHaveValue("");
+  await page.getByLabel("Cari produk", { exact: true }).fill("");
+  await page.getByLabel("Produk", { exact: true }).selectOption("1");
   await page
     .getByLabel("Catatan (opsional)", { exact: true })
     .fill("Restok dari pemasok");

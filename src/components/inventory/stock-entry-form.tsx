@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Input } from "@/components/ui/input";
 import {
   NativeSelect,
@@ -17,7 +27,12 @@ import {
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { demoProducts, formatNumber } from "@/lib/inventory";
+import {
+  defaultProductFilters,
+  demoProducts,
+  filterProducts,
+  formatNumber,
+} from "@/lib/inventory";
 import type { StockSearch } from "@/lib/stock-search";
 
 export function StockEntryForm({
@@ -34,6 +49,20 @@ export function StockEntryForm({
       : (demoProducts[0]?.id ?? ""),
   );
   const [quantity, setQuantity] = useState("");
+  const [productQuery, setProductQuery] = useState("");
+  const matches = filterProducts(demoProducts, {
+    ...defaultProductFilters,
+    query: productQuery,
+  });
+  function searchProducts(query: string) {
+    setProductQuery(query);
+    if (
+      !filterProducts(demoProducts, { ...defaultProductFilters, query }).some(
+        (item) => item.id === productId,
+      )
+    )
+      setProductId("");
+  }
   const [note, setNote] = useState("");
   const [reviewing, setReviewing] = useState(false);
   const product = demoProducts.find((item) => item.id === productId);
@@ -92,6 +121,32 @@ export function StockEntryForm({
             <form onSubmit={review} className="flex flex-col gap-6">
               <FieldGroup className="gap-5">
                 <Field className="gap-2">
+                  <FieldLabel htmlFor="entry-search">Cari produk</FieldLabel>
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <Search aria-hidden="true" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="entry-search"
+                      type="search"
+                      value={productQuery}
+                      onChange={(event) => searchProducts(event.target.value)}
+                      placeholder="Nama produk atau SKU..."
+                      maxLength={160}
+                    />
+                  </InputGroup>
+                  <FieldDescription
+                    role="status"
+                    className={productQuery ? undefined : "sr-only"}
+                  >
+                    {productQuery
+                      ? matches.length
+                        ? `${matches.length} produk cocok. Pilih produk di bawah.`
+                        : "Produk tidak ditemukan. Ubah pencarian."
+                      : ""}
+                  </FieldDescription>
+                </Field>
+                <Field className="gap-2">
                   <FieldLabel htmlFor="entry-product">Produk</FieldLabel>
                   <NativeSelect
                     id="entry-product"
@@ -100,12 +155,20 @@ export function StockEntryForm({
                     onChange={(event) => setProductId(event.target.value)}
                     required
                   >
-                    {demoProducts.map((item) => (
+                    <NativeSelectOption value="" disabled>
+                      Pilih produk
+                    </NativeSelectOption>
+                    {matches.map((item) => (
                       <NativeSelectOption key={item.id} value={item.id}>
                         {item.name} · {formatNumber(item.stock)} {item.unit}
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
+                  {product && (
+                    <FieldDescription>
+                      {product.sku || "Tanpa SKU"} · {product.category}
+                    </FieldDescription>
+                  )}
                 </Field>
                 <Field className="gap-2">
                   <FieldLabel htmlFor="entry-quantity">Jumlah masuk</FieldLabel>
