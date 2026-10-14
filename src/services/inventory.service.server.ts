@@ -3,7 +3,10 @@ import { db } from "@/db/index.server";
 import { products } from "@/db/schema/products";
 import { stockMovements } from "@/db/schema/stock-movements";
 import type { ListProductsInput } from "@/validators/inventory";
-import type { IncomingStockInput } from "@/validators/inventory";
+import type {
+  IncomingStockInput,
+  CreateProductInput,
+} from "@/validators/inventory";
 import { InventoryError } from "@/lib/inventory-error";
 
 export const productFields = {
@@ -16,6 +19,29 @@ export const productFields = {
   unit: products.unit,
   updatedAt: products.updatedAt,
 };
+
+function databaseCode(error: unknown): string | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  if ("code" in error && typeof error.code === "string") return error.code;
+  return "cause" in error ? databaseCode(error.cause) : undefined;
+}
+
+export async function createProduct(userId: string, input: CreateProductInput) {
+  try {
+    const [row] = await db
+      .insert(products)
+      .values({ ...input, userId })
+      .returning(productFields);
+    return { ...row, updatedAt: row.updatedAt.toISOString() };
+  } catch (error) {
+    if (databaseCode(error) === "23505")
+      throw new InventoryError(
+        "SKU_EXISTS",
+        "SKU sudah dipakai produk lain di toko Anda.",
+      );
+    throw error;
+  }
+}
 
 export async function recordIncoming(
   userId: string,

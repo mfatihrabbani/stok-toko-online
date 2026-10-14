@@ -1,6 +1,16 @@
 import { z } from "zod";
 
 export const inventoryIdSchema = z.string().uuid();
+export const createProductSchema = z
+  .object({
+    name: z.string().trim().min(1).max(160),
+    sku: z.string().trim().max(80).default(""),
+    category: z.string().trim().min(1).max(80).default("Tanpa kategori"),
+    minStock: z.number().int().min(0).max(2147483647).default(0),
+    unit: z.string().trim().min(1).max(30).default("unit"),
+  })
+  .strict();
+export type CreateProductInput = z.infer<typeof createProductSchema>;
 export const listProductsSchema = z
   .object({
     q: z.string().trim().max(160).default(""),
