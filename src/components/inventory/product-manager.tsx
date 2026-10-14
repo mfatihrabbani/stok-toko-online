@@ -26,15 +26,20 @@ import {
 } from "@/components/ui/table";
 import {
   defaultProductFilters,
-  demoProducts,
   filterProducts,
   formatNumber,
   stockStatus,
   type Product,
 } from "@/lib/inventory";
 
+import { useInventory } from "@/lib/use-inventory";
+import { inventoryRequest } from "@/lib/inventory-client";
+
 export function ProductManager() {
-  const [products, setProducts] = useState<Product[]>(demoProducts);
+  const { products: savedProducts, refresh } = useInventory();
+  const [saving, setSaving] = useState(false);
+  const [failure, setFailure] = useState("");
+  const [products, setProducts] = useState<Product[]>(savedProducts);
   const [filters, setFilters] = useState(defaultProductFilters);
   const [extraCategories, setExtraCategories] = useState<string[]>([]);
   const categories = [
@@ -54,10 +59,18 @@ export function ProductManager() {
       <Dialog
         open={creating || Boolean(editing)}
         onOpenChange={(open) => {
-          if (!open) closeEditor();
+          if (!open && !saving) closeEditor();
         }}
       >
         <DialogContent className="max-h-[calc(100dvh-32px)] overflow-y-auto">
+          {failure && (
+            <p
+              role="alert"
+              className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+            >
+              {failure}
+            </p>
+          )}
           <DialogHeader>
             <DialogTitle>
               {editing ? "Ubah produk" : "Tambah produk"}
@@ -74,18 +87,49 @@ export function ProductManager() {
             initialProduct={editing}
             categories={categories}
             onCancel={closeEditor}
-            onSave={(product) => {
-              setProducts((current) =>
-                editing
-                  ? current.map((item) =>
-                      item.id === product.id ? product : item,
-                    )
-                  : [...current, product],
-              );
-              closeEditor();
-              setMessage(
-                `${product.name} ${editing ? "diperbarui" : "ditambahkan"} pada data contoh.`,
-              );
+            saving={saving}
+            onSave={async (product) => {
+              if (saving) return;
+              setSaving(true);
+              setFailure("");
+              try {
+                const metadata = {
+                  name: product.name,
+                  sku: product.sku,
+                  category: product.category,
+                  minStock: product.minStock,
+                  unit: product.unit,
+                };
+                const saved = await inventoryRequest<Product>(
+                  editing ? `/api/products/${product.id}` : "/api/products",
+                  {
+                    method: editing ? "PATCH" : "POST",
+                    body: editing
+                      ? metadata
+                      : { ...metadata, id: product.id, stock: product.stock },
+                  },
+                );
+                setProducts((current) =>
+                  editing
+                    ? current.map((item) =>
+                        item.id === saved.id ? saved : item,
+                      )
+                    : [...current, saved],
+                );
+                closeEditor();
+                setMessage(
+                  `${saved.name} ${editing ? "diperbarui" : "ditambahkan"}.`,
+                );
+                void refresh().catch(() => {});
+              } catch (error) {
+                setFailure(
+                  error instanceof Error
+                    ? error.message
+                    : "Produk belum tersimpan. Coba lagi.",
+                );
+              } finally {
+                setSaving(false);
+              }
             }}
           />
         </DialogContent>
@@ -93,10 +137,18 @@ export function ProductManager() {
       <Dialog
         open={Boolean(deleting)}
         onOpenChange={(open) => {
-          if (!open) setDeleting(undefined);
+          if (!open && !saving) setDeleting(undefined);
         }}
       >
         <DialogContent>
+          {failure && (
+            <p
+              role="alert"
+              className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+            >
+              {failure}
+            </p>
+          )}
           <DialogHeader>
             <DialogTitle>Hapus produk?</DialogTitle>
             <DialogDescription>
@@ -110,13 +162,32 @@ export function ProductManager() {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                if (!deleting) return;
-                setProducts((current) =>
-                  current.filter((item) => item.id !== deleting.id),
-                );
-                setMessage(`${deleting.name} dihapus dari data contoh.`);
-                setDeleting(undefined);
+              disabled={saving}
+              onClick={async () => {
+                if (!deleting || saving) return;
+                setSaving(true);
+                setFailure("");
+                try {
+                  await inventoryRequest<void>(`/api/products/${deleting.id}`, {
+                    method: "DELETE",
+                  });
+                  setProducts((current) =>
+                    current.filter((item) => item.id !== deleting.id),
+                  );
+                  setMessage(
+                    `${deleting.name} dihapus dari daftar aktif. Riwayat tetap tersimpan.`,
+                  );
+                  setDeleting(undefined);
+                  void refresh().catch(() => {});
+                } catch (error) {
+                  setFailure(
+                    error instanceof Error
+                      ? error.message
+                      : "Produk belum dihapus. Coba lagi.",
+                  );
+                } finally {
+                  setSaving(false);
+                }
               }}
             >
               Hapus produk
@@ -170,7 +241,7 @@ export function ProductManager() {
             </h2>
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Data contoh untuk pratinjau pengelolaan produk.
+            Produk yang tersimpan pada toko Anda.
           </p>
           <StockFilters
             products={products}

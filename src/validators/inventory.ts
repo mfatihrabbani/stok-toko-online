@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const inventoryIdSchema = z.string().uuid();
-export const createProductSchema = z
+export const productMetadataSchema = z
   .object({
     name: z.string().trim().min(1).max(160),
     sku: z.string().trim().max(80).default(""),
@@ -10,7 +10,27 @@ export const createProductSchema = z
     unit: z.string().trim().min(1).max(30).default("unit"),
   })
   .strict();
+export const createProductSchema = productMetadataSchema
+  .extend({
+    id: inventoryIdSchema.optional(),
+    stock: z.number().int().min(0).max(2147483647).default(0),
+  })
+  .strict();
 export type CreateProductInput = z.infer<typeof createProductSchema>;
+export const updateProductSchema = z
+  .object({
+    name: z.string().trim().min(1).max(160).optional(),
+    sku: z.string().trim().max(80).optional(),
+    category: z.string().trim().min(1).max(80).optional(),
+    minStock: z.number().int().min(0).max(2147483647).optional(),
+    unit: z.string().trim().min(1).max(30).optional(),
+  })
+  .strict()
+  .refine(
+    (value) => Object.keys(value).length > 0,
+    "Isi setidaknya satu perubahan.",
+  );
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export const listProductsSchema = z
   .object({
     q: z.string().trim().max(160).default(""),
@@ -24,7 +44,7 @@ export type ListProductsInput = z.infer<typeof listProductsSchema>;
 export const incomingStockSchema = z
   .object({
     productId: inventoryIdSchema.optional(),
-    newProduct: createProductSchema.optional(),
+    newProduct: productMetadataSchema.optional(),
     quantity: z.number().int().min(1).max(2147483647),
     note: z.string().trim().max(300).default(""),
     requestId: z.string().uuid(),

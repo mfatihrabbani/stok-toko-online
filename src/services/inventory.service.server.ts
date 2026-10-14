@@ -1,6 +1,7 @@
-import { and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, lt, or, sql, isNull } from "drizzle-orm";
 import { db } from "@/db/index.server";
 import { products } from "@/db/schema/products";
+import { categories } from "@/db/schema/categories";
 import { stockMovements } from "@/db/schema/stock-movements";
 import type { ListProductsInput } from "@/validators/inventory";
 import type {
@@ -70,13 +71,77 @@ function databaseCode(error: unknown): string | undefined {
   return "cause" in error ? databaseCode(error.cause) : undefined;
 }
 
+function activeOwner(userId: string) {
+  return and(eq(products.userId, userId), isNull(products.archivedAt));
+}
+type InventoryTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+async function resolveCategory(
+  tx: InventoryTransaction,
+  userId: string,
+  name: string,
+) {
+  await tx.execute(
+    sql`select pg_advisory_xact_lock(hashtextextended(${"categories:" + userId}, 0))`,
+  );
+  if (name.toLocaleLowerCase("id-ID") === "tanpa kategori")
+    return { category: "Tanpa kategori", categoryId: null };
+  if (name.toLowerCase() === "all")
+    throw new InventoryError("INVALID_STOCK", "Gunakan nama kategori lain.");
+  await tx.insert(categories).values({ userId, name }).onConflictDoNothing();
+  const [category] = await tx
+    .select({ id: categories.id, name: categories.name })
+    .from(categories)
+    .where(
+      and(
+        eq(categories.userId, userId),
+        sql`lower(${categories.name}) = lower(${name})`,
+      ),
+    );
+  return { category: category.name, categoryId: category.id };
+}
+
 export async function createProduct(userId: string, input: CreateProductInput) {
   try {
-    const [row] = await db
-      .insert(products)
-      .values({ ...input, userId })
-      .returning(productFields);
-    return { ...row, updatedAt: row.updatedAt.toISOString() };
+    return await db.transaction(async (tx) => {
+      if (input.id) {
+        await tx.execute(
+          sql`select pg_advisory_xact_lock(hashtextextended(${"product:" + userId + ":" + input.id}, 0))`,
+        );
+        const [previous] = await tx
+          .select(productFields)
+          .from(products)
+          .where(and(eq(products.id, input.id), activeOwner(userId)));
+        if (previous) {
+          if (previous.name !== input.name || previous.sku !== input.sku)
+            throw new InventoryError(
+              "REQUEST_CONFLICT",
+              "Produk sudah dibuat dengan identitas berbeda.",
+            );
+          return { ...previous, updatedAt: previous.updatedAt.toISOString() };
+        }
+      }
+      const category = await resolveCategory(tx, userId, input.category);
+      const [row] = await tx
+        .insert(products)
+        .values({ ...input, ...category, userId })
+        .returning(productFields);
+      if (input.stock > 0)
+        await tx
+          .insert(stockMovements)
+          .values({
+            userId,
+            productId: row.id,
+            productName: row.name,
+            productSku: row.sku,
+            direction: "in",
+            quantity: input.stock,
+            stockBefore: 0,
+            stockAfter: input.stock,
+            note: "Stok awal produk",
+            requestId: row.id,
+          });
+      return { ...row, updatedAt: row.updatedAt.toISOString() };
+    });
   } catch (error) {
     if (databaseCode(error) === "23505")
       throw new InventoryError(
@@ -85,6 +150,44 @@ export async function createProduct(userId: string, input: CreateProductInput) {
       );
     throw error;
   }
+}
+
+export async function updateProduct(
+  userId: string,
+  id: string,
+  input: import("@/validators/inventory").UpdateProductInput,
+) {
+  try {
+    return await db.transaction(async (tx) => {
+      const category =
+        input.category === undefined
+          ? {}
+          : await resolveCategory(tx, userId, input.category);
+      const [row] = await tx
+        .update(products)
+        .set({ ...input, ...category })
+        .where(and(eq(products.id, id), activeOwner(userId)))
+        .returning(productFields);
+      if (!row)
+        throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
+      return { ...row, updatedAt: row.updatedAt.toISOString() };
+    });
+  } catch (error) {
+    if (databaseCode(error) === "23505")
+      throw new InventoryError(
+        "SKU_EXISTS",
+        "SKU sudah dipakai produk lain di toko Anda.",
+      );
+    throw error;
+  }
+}
+export async function archiveProduct(userId: string, id: string) {
+  const [row] = await db
+    .update(products)
+    .set({ archivedAt: new Date() })
+    .where(and(eq(products.id, id), activeOwner(userId)))
+    .returning({ id: products.id });
+  return Boolean(row);
 }
 
 async function recordMovement(
@@ -136,12 +239,9 @@ async function recordMovement(
         const [product] = await tx
           .select(productFields)
           .from(products)
-          .where(
-            and(
-              eq(products.id, previous.productId),
-              eq(products.userId, userId),
-            ),
-          );
+          .where(and(eq(products.id, previous.productId), activeOwner(userId)));
+        if (!product)
+          throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
         return {
           product: { ...product, updatedAt: product.updatedAt.toISOString() },
           receipt: {
@@ -155,17 +255,16 @@ async function recordMovement(
       const [product] = input.newProduct
         ? await tx
             .insert(products)
-            .values({ ...input.newProduct, userId })
+            .values({
+              ...input.newProduct,
+              ...(await resolveCategory(tx, userId, input.newProduct.category)),
+              userId,
+            })
             .returning(productFields)
         : await tx
             .select(productFields)
             .from(products)
-            .where(
-              and(
-                eq(products.id, input.productId!),
-                eq(products.userId, userId),
-              ),
-            )
+            .where(and(eq(products.id, input.productId!), activeOwner(userId)))
             .for("update");
       if (!product)
         throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
@@ -184,7 +283,7 @@ async function recordMovement(
       const [updated] = await tx
         .update(products)
         .set({ stock: after })
-        .where(and(eq(products.id, product.id), eq(products.userId, userId)))
+        .where(and(eq(products.id, product.id), activeOwner(userId)))
         .returning(productFields);
       const [movement] = await tx
         .insert(stockMovements)
@@ -235,7 +334,7 @@ export async function getInventory(userId: string) {
   const rows = await db
     .select(productFields)
     .from(products)
-    .where(eq(products.userId, userId))
+    .where(activeOwner(userId))
     .orderBy(asc(products.name), asc(products.id));
   return rows.map((row) => ({
     ...row,
@@ -247,7 +346,7 @@ export async function getProduct(userId: string, id: string) {
   const [product] = await db
     .select(productFields)
     .from(products)
-    .where(and(eq(products.id, id), eq(products.userId, userId)))
+    .where(and(eq(products.id, id), activeOwner(userId)))
     .limit(1);
   if (!product) return null;
   const movements = await db
@@ -292,7 +391,7 @@ export async function getStockSummary(userId: string) {
       categoryCount: sql`count(distinct ${products.category})`.mapWith(Number),
     })
     .from(products)
-    .where(eq(products.userId, userId));
+    .where(activeOwner(userId));
   return summary;
 }
 
@@ -305,7 +404,7 @@ export async function listProducts(
     .from(products)
     .where(
       and(
-        eq(products.userId, userId),
+        activeOwner(userId),
         q
           ? or(
               sql`position(lower(${q}) in lower(${products.name})) > 0`,

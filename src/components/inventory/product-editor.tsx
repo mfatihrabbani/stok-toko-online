@@ -15,12 +15,14 @@ export function ProductEditor({
   onCancel,
   initialProduct,
   categories,
+  saving = false,
 }: {
   products: Product[];
   onSave: (product: Product) => void;
   onCancel: () => void;
   initialProduct?: Product;
   categories?: string[];
+  saving?: boolean;
 }) {
   const [stock, setStock] = useState("0");
   const [error, setError] = useState("");
@@ -32,6 +34,7 @@ export function ProductEditor({
           <FieldLabel htmlFor="product-initial-stock">Stok awal</FieldLabel>
           <Input
             id="product-initial-stock"
+            disabled={saving}
             ref={stockRef}
             type="number"
             inputMode="numeric"
@@ -57,7 +60,14 @@ export function ProductEditor({
         products={products}
         initialProduct={initialProduct}
         categories={categories}
-        submitLabel={initialProduct ? "Simpan perubahan" : "Simpan produk"}
+        saving={saving}
+        submitLabel={
+          saving
+            ? "Menyimpan..."
+            : initialProduct
+              ? "Simpan perubahan"
+              : "Simpan produk"
+        }
         onCancel={onCancel}
         onCreate={(created) => {
           const amount = initialProduct?.stock ?? Number(stock);

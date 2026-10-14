@@ -19,6 +19,7 @@ export function NewProductFields({
   initialProduct,
   submitLabel = "Gunakan produk",
   categories = [],
+  saving = false,
 }: {
   products: Product[];
   onCreate: (product: Product) => void;
@@ -26,6 +27,7 @@ export function NewProductFields({
   initialProduct?: Product;
   submitLabel?: string;
   categories?: string[];
+  saving?: boolean;
 }) {
   const [name, setName] = useState(initialProduct?.name ?? "");
   const [sku, setSku] = useState(initialProduct?.sku ?? "");
@@ -74,7 +76,7 @@ export function NewProductFields({
     });
   }
   return (
-    <FieldSet className="rounded-md border bg-muted/50 p-4">
+    <FieldSet disabled={saving} className="rounded-md border bg-muted/50 p-4">
       <FieldLegend>
         {initialProduct ? "Data produk" : "Produk baru"}
       </FieldLegend>
