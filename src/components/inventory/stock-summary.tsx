@@ -45,7 +45,7 @@ export function StockSummary({ products }: { products: Product[] }) {
           </div>
           <svg
             className="stock-kpi-chart"
-            viewBox="0 0 120 72"
+            viewBox={`0 0 ${Math.max(120, categories.length * 27 + 16)} 72`}
             role="img"
             aria-label={
               categories

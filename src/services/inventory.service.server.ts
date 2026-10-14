@@ -17,6 +17,7 @@ export const productFields = {
   category: products.category,
   stock: products.stock,
   minStock: products.minStock,
+  lowStock: sql<boolean>`${products.stock} < ${products.minStock}`,
   unit: products.unit,
   updatedAt: products.updatedAt,
 };
@@ -126,20 +127,18 @@ export async function createProduct(userId: string, input: CreateProductInput) {
         .values({ ...input, ...category, userId })
         .returning(productFields);
       if (input.stock > 0)
-        await tx
-          .insert(stockMovements)
-          .values({
-            userId,
-            productId: row.id,
-            productName: row.name,
-            productSku: row.sku,
-            direction: "in",
-            quantity: input.stock,
-            stockBefore: 0,
-            stockAfter: input.stock,
-            note: "Stok awal produk",
-            requestId: row.id,
-          });
+        await tx.insert(stockMovements).values({
+          userId,
+          productId: row.id,
+          productName: row.name,
+          productSku: row.sku,
+          direction: "in",
+          quantity: input.stock,
+          stockBefore: 0,
+          stockAfter: input.stock,
+          note: "Stok awal produk",
+          requestId: row.id,
+        });
       return { ...row, updatedAt: row.updatedAt.toISOString() };
     });
   } catch (error) {

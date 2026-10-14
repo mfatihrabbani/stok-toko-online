@@ -1,4 +1,5 @@
 export interface Product {
+  lowStock?: boolean;
   id: string;
   name: string;
   sku: string;

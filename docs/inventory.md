@@ -11,3 +11,5 @@ Barang keluar menggunakan tabel dan migrasi yang sama, dengan `direction = out`.
 Pemilih produk pada barang masuk memakai daftar milik akun yang dimuat dari server. Pencarian nama atau SKU juga tersedia lewat `/api/products?q=teks&limit=100&offset=0`; kategori dan kondisi stok dapat digabungkan. Input pencarian menjadi parameter SQL, bukan potongan query. SKU/nama yang mengandung tanda persen atau garis bawah tetap dicari sebagai teks biasa.
 
 Barang keluar memakai kontrak daftar/pencarian yang sama. Pemilih tetap menampilkan produk habis beserta jumlah tersedia agar pengguna memahami mengapa produk itu belum dapat dikeluarkan. Produk baru di form masuk tetap berupa draf sampai konfirmasi tersimpan.
+
+Layanan produk menghitung `lowStock` dari stok saat ini dan batas minimal di SQL; nilainya ikut berubah setelah pencatatan maupun pengubahan batas. Antarmuka membedakan Habis (stok nol) dan Menipis (stok positif di bawah batas). Batas yang sama dengan stok masih dianggap aman. Stok awal produk baru dicatat sebagai pergerakan masuk dalam transaksi pembuatan yang sama; pengubahan produk tidak dapat menimpa jumlah stok secara langsung.

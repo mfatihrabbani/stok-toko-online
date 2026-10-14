@@ -179,11 +179,25 @@ export function CategoryManager({
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                if (deleting) onChange(deleting, null);
-                setDeleting(undefined);
-                setEditing(null);
-                setName("");
+              disabled={saving}
+              onClick={async () => {
+                if (!deleting || saving) return;
+                setSaving(true);
+                setError("");
+                try {
+                  await onChange(deleting, null);
+                  setDeleting(undefined);
+                  setEditing(null);
+                  setName("");
+                } catch (error) {
+                  setError(
+                    error instanceof Error
+                      ? error.message
+                      : "Kategori belum dihapus. Coba lagi.",
+                  );
+                } finally {
+                  setSaving(false);
+                }
               }}
             >
               Hapus kategori
