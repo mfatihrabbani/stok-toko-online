@@ -16,7 +16,7 @@ import { Brand } from "@/components/brand";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getInventoryFn } from "@/lib/inventory-queries";
+import { getCategoriesFn, getInventoryFn } from "@/lib/inventory-queries";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context }) => {
@@ -24,7 +24,13 @@ export const Route = createFileRoute("/_protected")({
     return { session: context.session };
   },
   component: ProtectedLayout,
-  loader: () => getInventoryFn(),
+  loader: async () => {
+    const [products, categories] = await Promise.all([
+      getInventoryFn(),
+      getCategoriesFn(),
+    ]);
+    return { products, categories };
+  },
 });
 
 function ProtectedLayout() {

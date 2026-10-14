@@ -36,14 +36,21 @@ import { useInventory } from "@/lib/use-inventory";
 import { inventoryRequest } from "@/lib/inventory-client";
 
 export function ProductManager() {
-  const { products: savedProducts, refresh } = useInventory();
+  const {
+    products: savedProducts,
+    categories: savedCategories,
+    refresh,
+  } = useInventory();
   const [saving, setSaving] = useState(false);
   const [failure, setFailure] = useState("");
   const [products, setProducts] = useState<Product[]>(savedProducts);
   const [filters, setFilters] = useState(defaultProductFilters);
-  const [extraCategories, setExtraCategories] = useState<string[]>([]);
+  const [categoryRecords, setCategoryRecords] = useState(savedCategories);
   const categories = [
-    ...new Set([...extraCategories, ...products.map((item) => item.category)]),
+    ...new Set([
+      ...categoryRecords.map((item) => item.name),
+      ...products.map((item) => item.category),
+    ]),
   ].sort();
   const visible = filterProducts(products, filters);
   const [creating, setCreating] = useState(false);
@@ -116,6 +123,11 @@ export function ProductManager() {
                       )
                     : [...current, saved],
                 );
+                void inventoryRequest<Array<{ id: string; name: string }>>(
+                  "/api/categories",
+                )
+                  .then(setCategoryRecords)
+                  .catch(() => {});
                 closeEditor();
                 setMessage(
                   `${saved.name} ${editing ? "diperbarui" : "ditambahkan"}.`,
@@ -215,20 +227,38 @@ export function ProductManager() {
         <CardHeader>
           <CategoryManager
             categories={categories}
-            onChange={(oldName, name) => {
-              setExtraCategories((current) => [
-                ...current.filter((item) => item !== oldName),
-                ...(name ? [name] : []),
+            onChange={async (oldName, name) => {
+              const category = categoryRecords.find(
+                (item) => item.name === oldName,
+              );
+              if (oldName && !category)
+                throw new Error(
+                  "Muat ulang halaman untuk mendapatkan kategori terbaru.",
+                );
+              const result = await inventoryRequest<
+                { id: string; name: string } | undefined
+              >(
+                category ? `/api/categories/${category.id}` : "/api/categories",
+                {
+                  method:
+                    name === null ? "DELETE" : category ? "PATCH" : "POST",
+                  body: name === null ? undefined : { name },
+                },
+              );
+              setCategoryRecords((current) => [
+                ...current.filter((item) => item.id !== category?.id),
+                ...(result ? [result] : []),
               ]);
               if (oldName)
                 setProducts((current) =>
                   current.map((item) =>
                     item.category === oldName
-                      ? { ...item, category: name || "Tanpa kategori" }
+                      ? { ...item, category: result?.name || "Tanpa kategori" }
                       : item,
                   ),
                 );
               setFilters(defaultProductFilters);
+              void refresh().catch(() => {});
             }}
           />
           <Button className="w-fit self-end" onClick={() => setCreating(true)}>

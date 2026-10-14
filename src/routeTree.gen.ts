@@ -22,6 +22,8 @@ import { Route as ProtectedProdukRouteImport } from './routes/_protected/produk'
 import { Route as ProtectedRiwayatRouteImport } from './routes/_protected/riwayat'
 import { Route as ProtectedProductsIdRouteImport } from './routes/_protected/products/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
+import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
 import { Route as ApiNotesIndexRouteImport } from './routes/api/notes/index'
 import { Route as ApiNotesIdRouteImport } from './routes/api/notes/$id'
 import { Route as ApiProductsIndexRouteImport } from './routes/api/products/index'
@@ -96,6 +98,16 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCategoriesIndexRoute = ApiCategoriesIndexRouteImport.update({
+  id: '/api/categories/',
+  path: '/api/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCategoriesIdRoute = ApiCategoriesIdRouteImport.update({
+  id: '/api/categories/$id',
+  path: '/api/categories/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiNotesIndexRoute = ApiNotesIndexRouteImport.update({
   id: '/api/notes/',
   path: '/api/notes/',
@@ -159,11 +171,13 @@ export interface FileRoutesByFullPath {
   '/riwayat': typeof ProtectedRiwayatRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
+  '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -182,11 +196,13 @@ export interface FileRoutesByTo {
   '/riwayat': typeof ProtectedRiwayatRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
+  '/api/categories': typeof ApiCategoriesIndexRoute
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/products': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -208,11 +224,13 @@ export interface FileRoutesById {
   '/_protected/riwayat': typeof ProtectedRiwayatRoute
   '/_protected/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/notes/$id': typeof ApiNotesIdRoute
   '/api/products/$id': typeof ApiProductsIdRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
+  '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
@@ -233,11 +251,13 @@ export interface FileRouteTypes {
     | '/riwayat'
     | '/products/$id'
     | '/api/auth/$'
+    | '/api/categories/$id'
     | '/api/notes/$id'
     | '/api/products/$id'
     | '/api/products/summary'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
+    | '/api/categories/'
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
@@ -256,11 +276,13 @@ export interface FileRouteTypes {
     | '/riwayat'
     | '/products/$id'
     | '/api/auth/$'
+    | '/api/categories/$id'
     | '/api/notes/$id'
     | '/api/products/$id'
     | '/api/products/summary'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
+    | '/api/categories'
     | '/api/notes'
     | '/api/products'
     | '/api/admin/notes/$id'
@@ -281,11 +303,13 @@ export interface FileRouteTypes {
     | '/_protected/riwayat'
     | '/_protected/products/$id'
     | '/api/auth/$'
+    | '/api/categories/$id'
     | '/api/notes/$id'
     | '/api/products/$id'
     | '/api/products/summary'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
+    | '/api/categories/'
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
@@ -298,11 +322,13 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   ProtectedRoute: typeof ProtectedRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiNotesIdRoute: typeof ApiNotesIdRoute
   ApiProductsIdRoute: typeof ApiProductsIdRoute
   ApiProductsSummaryRoute: typeof ApiProductsSummaryRoute
   ApiStockIncomingRoute: typeof ApiStockIncomingRoute
   ApiStockOutgoingRoute: typeof ApiStockOutgoingRoute
+  ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiProductsIndexRoute: typeof ApiProductsIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
@@ -401,6 +427,20 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/categories/': {
+      id: '/api/categories/'
+      path: '/api/categories'
+      fullPath: '/api/categories/'
+      preLoaderRoute: typeof ApiCategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/categories/$id': {
+      id: '/api/categories/$id'
+      path: '/api/categories/$id'
+      fullPath: '/api/categories/$id'
+      preLoaderRoute: typeof ApiCategoriesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/notes/': {
@@ -517,11 +557,13 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   ProtectedRoute: ProtectedRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiNotesIdRoute: ApiNotesIdRoute,
   ApiProductsIdRoute: ApiProductsIdRoute,
   ApiProductsSummaryRoute: ApiProductsSummaryRoute,
   ApiStockIncomingRoute: ApiStockIncomingRoute,
   ApiStockOutgoingRoute: ApiStockOutgoingRoute,
+  ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiProductsIndexRoute: ApiProductsIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,

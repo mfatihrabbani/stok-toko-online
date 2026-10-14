@@ -1,6 +1,19 @@
 import { z } from "zod";
 
 export const inventoryIdSchema = z.string().uuid();
+export const categoryInputSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1)
+      .max(80)
+      .refine(
+        (value) => !["all", "tanpa kategori"].includes(value.toLowerCase()),
+        "Gunakan nama kategori lain.",
+      ),
+  })
+  .strict();
 export const productMetadataSchema = z
   .object({
     name: z.string().trim().min(1).max(160),

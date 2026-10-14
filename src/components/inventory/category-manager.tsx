@@ -16,8 +16,12 @@ export function CategoryManager({
   onChange,
 }: {
   categories: string[];
-  onChange: (oldName: string | null, name: string | null) => void;
+  onChange: (
+    oldName: string | null,
+    name: string | null,
+  ) => void | Promise<void>;
 }) {
+  const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
@@ -28,7 +32,12 @@ export function CategoryManager({
       <Button variant="outline" onClick={() => setOpen(true)}>
         Kelola kategori
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(value) => {
+          if (!saving) setOpen(value);
+        }}
+      >
         <DialogContent className="max-h-[calc(100dvh-32px)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Kategori produk</DialogTitle>
@@ -38,7 +47,7 @@ export function CategoryManager({
           </DialogHeader>
           <form
             className="flex flex-col gap-3"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
               const trimmed = name.trim();
               if (
@@ -59,10 +68,22 @@ export function CategoryManager({
                 setError("Kategori dengan nama ini sudah ada.");
                 return;
               }
-              onChange(editing, trimmed);
-              setEditing(null);
-              setName("");
+              if (saving) return;
+              setSaving(true);
               setError("");
+              try {
+                await onChange(editing, trimmed);
+                setEditing(null);
+                setName("");
+              } catch (error) {
+                setError(
+                  error instanceof Error
+                    ? error.message
+                    : "Kategori belum tersimpan. Coba lagi.",
+                );
+              } finally {
+                setSaving(false);
+              }
             }}
           >
             <Field>
@@ -82,7 +103,7 @@ export function CategoryManager({
               {error && <FieldError>{error}</FieldError>}
             </Field>
             <div className="flex gap-3">
-              <Button type="submit">
+              <Button type="submit" disabled={saving}>
                 {editing ? "Simpan nama" : "Tambah kategori"}
               </Button>
               {editing && (
@@ -110,7 +131,7 @@ export function CategoryManager({
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={category === "Tanpa kategori"}
+                    disabled={saving || category === "Tanpa kategori"}
                     onClick={() => {
                       setEditing(category);
                       setName(category);
@@ -136,7 +157,7 @@ export function CategoryManager({
       <Dialog
         open={Boolean(deleting)}
         onOpenChange={(value) => {
-          if (!value) setDeleting(undefined);
+          if (!value && !saving) setDeleting(undefined);
         }}
       >
         <DialogContent>
@@ -147,6 +168,11 @@ export function CategoryManager({
               kategori. Produk dan stok tetap tersimpan.
             </DialogDescription>
           </DialogHeader>
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleting(undefined)}>
               Batal

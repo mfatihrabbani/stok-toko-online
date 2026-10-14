@@ -44,7 +44,7 @@ export function StockEntryForm({
   direction?: "in" | "out";
 }) {
   const outgoing = direction === "out";
-  const { products: savedProducts, refresh } = useInventory();
+  const { products: savedProducts, categories, refresh } = useInventory();
   const [overrides, setProducts] = useState<Product[]>([]);
   const products = [
     ...savedProducts.map(
@@ -300,6 +300,7 @@ export function StockEntryForm({
               {addingProduct && (
                 <NewProductFields
                   products={products}
+                  categories={categories.map((item) => item.name)}
                   onCancel={() => setAddingProduct(false)}
                   onCreate={(created) => {
                     draftIdsRef.current.add(created.id);
