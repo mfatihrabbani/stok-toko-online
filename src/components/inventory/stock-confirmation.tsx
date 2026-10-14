@@ -29,6 +29,12 @@ export function StockConfirmation({
   direction?: "in" | "out";
 }) {
   if (!product) return null;
+  const newStock = product.stock + quantity * (direction === "out" ? -1 : 1);
+  const valid =
+    Number.isSafeInteger(quantity) &&
+    quantity > 0 &&
+    newStock >= 0 &&
+    newStock <= 2147483647;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -70,14 +76,17 @@ export function StockConfirmation({
           <div className="flex flex-wrap justify-between gap-3 rounded-md bg-muted p-3">
             <dt>Stok saat ini → stok baru</dt>
             <dd className="font-semibold tabular-nums">
-              {formatNumber(product.stock)} →{" "}
-              {formatNumber(
-                product.stock + quantity * (direction === "out" ? -1 : 1),
-              )}{" "}
+              {formatNumber(product.stock)} → {formatNumber(newStock)}{" "}
               {product.unit}
             </dd>
           </div>
         </dl>
+        {direction === "out" && newStock < product.minStock && (
+          <p className="rounded-md bg-warning-soft p-3 text-sm text-warning">
+            Setelah dicatat, stok berada di bawah batas minimal{" "}
+            {formatNumber(product.minStock)} {product.unit}.
+          </p>
+        )}
         <p className="rounded-md bg-muted p-3 text-xs leading-5 text-muted-foreground">
           Menyimpan catatan akan{" "}
           {direction === "out" ? "mengurangi" : "menambah"} stok produk dan
@@ -88,7 +97,7 @@ export function StockConfirmation({
             Ubah catatan
           </Button>
           {onConfirm && (
-            <Button onClick={onConfirm}>
+            <Button onClick={onConfirm} disabled={!valid}>
               Simpan barang {direction === "out" ? "keluar" : "masuk"}
             </Button>
           )}
