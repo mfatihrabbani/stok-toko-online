@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldError,
+  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldLegend,
@@ -134,6 +135,10 @@ export function NewProductFields({
         </Field>
         <Field data-invalid={Boolean(errors.minimum)} className="gap-2">
           <FieldLabel htmlFor="new-product-minimum">Stok minimal</FieldLabel>
+          <FieldDescription>
+            Produk ditandai menipis ketika stok kurang dari batas ini. Isi 0
+            bila tidak memerlukan batas minimal.
+          </FieldDescription>
           <Input
             ref={minimumRef}
             id="new-product-minimum"

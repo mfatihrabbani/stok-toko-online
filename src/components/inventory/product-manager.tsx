@@ -29,6 +29,7 @@ import {
   demoProducts,
   filterProducts,
   formatNumber,
+  stockStatus,
   type Product,
 } from "@/lib/inventory";
 
@@ -223,7 +224,17 @@ export function ProductManager() {
                     {product.category}
                   </TableCell>
                   <TableCell data-label="Stok">
-                    {formatNumber(product.stock)} {product.unit}
+                    <span
+                      className={
+                        stockStatus(product) === "Habis"
+                          ? "font-semibold text-destructive"
+                          : stockStatus(product) === "Menipis"
+                            ? "font-semibold text-warning"
+                            : "font-medium"
+                      }
+                    >
+                      {formatNumber(product.stock)} {product.unit}
+                    </span>
                   </TableCell>
                   <TableCell data-label="Minimal">
                     {formatNumber(product.minStock)} {product.unit}
