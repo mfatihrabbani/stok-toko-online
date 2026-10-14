@@ -34,8 +34,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       if (result.error) {
         setError(
           signingUp
-            ? result.error.message ||
-                "We couldn't create your account. Please try again."
+            ? "Akun belum bisa dibuat. Periksa isian atau masuk bila sudah terdaftar."
             : "Belum berhasil masuk. Periksa email dan kata sandi Anda.",
         );
         return;
@@ -53,14 +52,14 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   return (
     <div className="w-full max-w-sm">
       <p className="mb-3 text-sm font-medium text-primary">
-        {signingUp ? "A place to begin" : "Persediaan toko Anda"}
+        {signingUp ? "Mulai kelola persediaan" : "Persediaan toko Anda"}
       </p>
       <h1 className="text-3xl font-semibold tracking-tight">
-        {signingUp ? "Create your account" : "Masuk ke toko"}
+        {signingUp ? "Daftar akun toko" : "Masuk ke toko"}
       </h1>
       <p className="mt-3 text-base leading-7 text-muted-foreground">
         {signingUp
-          ? "One small step. Then make this app your own."
+          ? "Buat akun untuk menyimpan produk dan stok toko Anda."
           : "Lihat stok dan catat barang masuk atau keluar dengan akun Anda."}
       </p>
       <form
@@ -71,16 +70,16 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       >
         <fieldset disabled={pending} className="space-y-5">
           <legend className="sr-only">
-            {signingUp ? "Account details" : "Data untuk masuk"}
+            {signingUp ? "Data akun toko" : "Data untuk masuk"}
           </legend>
           {signingUp && (
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Nama pemilik atau toko</Label>
               <Input
                 id="name"
                 name="name"
                 autoComplete="name"
-                placeholder="Your name"
+                placeholder="Contoh: Toko Sinar"
                 required
                 minLength={1}
                 maxLength={100}
@@ -95,15 +94,13 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
               name="email"
               type="email"
               autoComplete="email"
-              placeholder="you@example.com"
+              placeholder="nama@contoh.com"
               required
               maxLength={254}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">
-              {signingUp ? "Password" : "Kata sandi"}
-            </Label>
+            <Label htmlFor="password">Kata sandi</Label>
             <Input
               id="password"
               name="password"
@@ -116,7 +113,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             />
             {signingUp && (
               <p id="password-hint" className="text-sm text-muted-foreground">
-                Use at least 8 characters.
+                Gunakan 8–128 karakter. Simpan kata sandi agar bisa masuk
+                kembali.
               </p>
             )}
           </div>
@@ -139,19 +137,19 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
             {pending
               ? "Mohon tunggu..."
               : signingUp
-                ? "Create account"
+                ? "Daftar akun toko"
                 : "Masuk"}
             {!pending && <ArrowRight aria-hidden="true" />}
           </Button>
         </fieldset>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        {signingUp ? "Already have an account?" : "Belum punya akun toko?"}{" "}
+        {signingUp ? "Sudah punya akun toko?" : "Belum punya akun toko?"}{" "}
         <Link
           className="rounded-sm font-medium text-foreground underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
           to={signingUp ? "/sign-in" : "/sign-up"}
         >
-          {signingUp ? "Sign in" : "Daftar akun toko"}
+          {signingUp ? "Masuk" : "Daftar akun toko"}
         </Link>
       </p>
     </div>
