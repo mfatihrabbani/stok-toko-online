@@ -17,6 +17,7 @@ export function StockConfirmation({
   onOpenChange,
   onCloseFocus,
   onConfirm,
+  direction = "in",
 }: {
   product?: Product;
   quantity: number;
@@ -25,6 +26,7 @@ export function StockConfirmation({
   onOpenChange: (open: boolean) => void;
   onCloseFocus: () => void;
   onConfirm?: () => void;
+  direction?: "in" | "out";
 }) {
   if (!product) return null;
   return (
@@ -51,7 +53,7 @@ export function StockConfirmation({
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Jenis catatan</dt>
-            <dd>Barang masuk</dd>
+            <dd>Barang {direction === "out" ? "keluar" : "masuk"}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">Jumlah</dt>
@@ -69,20 +71,26 @@ export function StockConfirmation({
             <dt>Stok saat ini → stok baru</dt>
             <dd className="font-semibold tabular-nums">
               {formatNumber(product.stock)} →{" "}
-              {formatNumber(product.stock + quantity)} {product.unit}
+              {formatNumber(
+                product.stock + quantity * (direction === "out" ? -1 : 1),
+              )}{" "}
+              {product.unit}
             </dd>
           </div>
         </dl>
         <p className="rounded-md bg-muted p-3 text-xs leading-5 text-muted-foreground">
-          Menyimpan catatan akan menambah stok produk dan mencatatnya di
-          riwayat.
+          Menyimpan catatan akan{" "}
+          {direction === "out" ? "mengurangi" : "menambah"} stok produk dan
+          mencatatnya di riwayat.
         </p>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Ubah catatan
           </Button>
           {onConfirm && (
-            <Button onClick={onConfirm}>Simpan barang masuk</Button>
+            <Button onClick={onConfirm}>
+              Simpan barang {direction === "out" ? "keluar" : "masuk"}
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>

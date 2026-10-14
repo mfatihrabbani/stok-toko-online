@@ -35,10 +35,13 @@ import type { StockSearch } from "@/lib/stock-search";
 export function StockEntryForm({
   initialProductId,
   returnSearch,
+  direction = "in",
 }: {
   initialProductId?: string;
   returnSearch: StockSearch;
+  direction?: "in" | "out";
 }) {
+  const outgoing = direction === "out";
   const [products, setProducts] = useState(demoProducts);
   const [addingProduct, setAddingProduct] = useState(false);
   const [productId, setProductId] = useState(
@@ -80,8 +83,10 @@ export function StockEntryForm({
     Boolean(product) &&
     Number.isSafeInteger(amount) &&
     amount > 0 &&
-    amount <= 2147483647 - (product?.stock ?? 0);
-  const after = (product?.stock ?? 0) + (valid ? amount : 0);
+    amount <=
+      (outgoing ? (product?.stock ?? 0) : 2147483647 - (product?.stock ?? 0));
+  const after =
+    (product?.stock ?? 0) + (valid ? amount * (outgoing ? -1 : 1) : 0);
   function save() {
     if (savingRef.current) return;
     savingRef.current = true;
@@ -139,7 +144,7 @@ export function StockEntryForm({
     <div className="stock-entry grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
       <Card className="shadow-none">
         <CardHeader className="sr-only">
-          <CardTitle>Data barang masuk</CardTitle>
+          <CardTitle>Data barang {outgoing ? "keluar" : "masuk"}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={review} noValidate className="flex flex-col gap-6">
@@ -211,14 +216,16 @@ export function StockEntryForm({
                     </NativeSelectOption>
                   ))}
                 </NativeSelect>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setAddingProduct((current) => !current)}
-                >
-                  <Plus data-icon="inline-start" aria-hidden="true" />
-                  Tambah produk baru
-                </Button>
+                {!outgoing && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setAddingProduct((current) => !current)}
+                  >
+                    <Plus data-icon="inline-start" aria-hidden="true" />
+                    Tambah produk baru
+                  </Button>
+                )}
                 {errors.product && (
                   <FieldError id="entry-product-error">
                     {errors.product}
@@ -244,7 +251,9 @@ export function StockEntryForm({
                 />
               )}
               <Field className="gap-2" data-invalid={Boolean(errors.quantity)}>
-                <FieldLabel htmlFor="entry-quantity">Jumlah masuk</FieldLabel>
+                <FieldLabel htmlFor="entry-quantity">
+                  Jumlah {outgoing ? "keluar" : "masuk"}
+                </FieldLabel>
                 <Input
                   id="entry-quantity"
                   ref={quantityRef}
@@ -258,7 +267,11 @@ export function StockEntryForm({
                   type="number"
                   inputMode="numeric"
                   min={1}
-                  max={2147483647 - (product?.stock ?? 0)}
+                  max={
+                    outgoing
+                      ? (product?.stock ?? 0)
+                      : 2147483647 - (product?.stock ?? 0)
+                  }
                   step={1}
                   value={quantity}
                   onChange={(event) => {
@@ -289,7 +302,11 @@ export function StockEntryForm({
                   onChange={(event) => setNote(event.target.value)}
                   maxLength={300}
                   rows={3}
-                  placeholder="Contoh: restok dari pemasok"
+                  placeholder={
+                    outgoing
+                      ? "Contoh: penjualan pesanan toko"
+                      : "Contoh: restok dari pemasok"
+                  }
                 />
               </Field>
             </FieldGroup>
@@ -323,7 +340,7 @@ export function StockEntryForm({
           </form>
         </CardContent>
       </Card>
-      <aside aria-label="Ringkasan barang masuk">
+      <aside aria-label={`Ringkasan barang ${outgoing ? "keluar" : "masuk"}`}>
         <Card className="shadow-none">
           <CardHeader>
             <CardTitle>
@@ -338,7 +355,7 @@ export function StockEntryForm({
               </div>
               <Separator />
               <div className="flex justify-between gap-3">
-                <dt>Masuk</dt>
+                <dt>{outgoing ? "Keluar" : "Masuk"}</dt>
                 <dd>{formatNumber(valid ? amount : 0)} unit</dd>
               </div>
             </dl>
@@ -364,6 +381,7 @@ export function StockEntryForm({
         onOpenChange={setReviewing}
         onCloseFocus={() => reviewRef.current?.focus()}
         onConfirm={save}
+        direction={direction}
       />
     </div>
   );

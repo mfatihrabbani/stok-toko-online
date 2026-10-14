@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowDownLeft } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -58,6 +58,12 @@ function StockPage() {
           Periksa persediaan, lalu catat barang yang masuk dan keluar.
         </p>
         <div className="stock-page-actions">
+          <Button variant="outline" asChild>
+            <Link to="/barang-keluar" search={search}>
+              <ArrowUpRight data-icon="inline-start" aria-hidden="true" />
+              Barang keluar
+            </Link>
+          </Button>
           <Button asChild>
             <Link to="/barang-masuk" search={search}>
               <ArrowDownLeft data-icon="inline-start" aria-hidden="true" />

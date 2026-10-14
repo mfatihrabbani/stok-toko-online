@@ -16,6 +16,7 @@ import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/_auth/sign-up'
 import { Route as ProtectedAdminRouteImport } from './routes/_protected/admin'
 import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
+import { Route as ProtectedBarangKeluarRouteImport } from './routes/_protected/barang-keluar'
 import { Route as ProtectedBarangMasukRouteImport } from './routes/_protected/barang-masuk'
 import { Route as ProtectedProductsIdRouteImport } from './routes/_protected/products/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -55,6 +56,11 @@ const ProtectedAdminRoute = ProtectedAdminRouteImport.update({
 const ProtectedAppRoute = ProtectedAppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedBarangKeluarRoute = ProtectedBarangKeluarRouteImport.update({
+  id: '/barang-keluar',
+  path: '/barang-keluar',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedBarangMasukRoute = ProtectedBarangMasukRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
   '/app': typeof ProtectedAppRoute
+  '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof AuthSignUpRoute
   '/admin': typeof ProtectedAdminRoute
   '/app': typeof ProtectedAppRoute
+  '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
   '/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/_protected/admin': typeof ProtectedAdminRoute
   '/_protected/app': typeof ProtectedAppRoute
+  '/_protected/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/_protected/barang-masuk': typeof ProtectedBarangMasukRoute
   '/_protected/products/$id': typeof ProtectedProductsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/admin'
     | '/app'
+    | '/barang-keluar'
     | '/barang-masuk'
     | '/products/$id'
     | '/api/auth/$'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/admin'
     | '/app'
+    | '/barang-keluar'
     | '/barang-masuk'
     | '/products/$id'
     | '/api/auth/$'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/_auth/sign-up'
     | '/_protected/admin'
     | '/_protected/app'
+    | '/_protected/barang-keluar'
     | '/_protected/barang-masuk'
     | '/_protected/products/$id'
     | '/api/auth/$'
@@ -247,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAppRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/barang-keluar': {
+      id: '/_protected/barang-keluar'
+      path: '/barang-keluar'
+      fullPath: '/barang-keluar'
+      preLoaderRoute: typeof ProtectedBarangKeluarRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/barang-masuk': {
       id: '/_protected/barang-masuk'
       path: '/barang-masuk'
@@ -314,6 +333,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 interface ProtectedRouteChildren {
   ProtectedAdminRoute: typeof ProtectedAdminRoute
   ProtectedAppRoute: typeof ProtectedAppRoute
+  ProtectedBarangKeluarRoute: typeof ProtectedBarangKeluarRoute
   ProtectedBarangMasukRoute: typeof ProtectedBarangMasukRoute
   ProtectedProductsIdRoute: typeof ProtectedProductsIdRoute
 }
@@ -321,6 +341,7 @@ interface ProtectedRouteChildren {
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAdminRoute: ProtectedAdminRoute,
   ProtectedAppRoute: ProtectedAppRoute,
+  ProtectedBarangKeluarRoute: ProtectedBarangKeluarRoute,
   ProtectedBarangMasukRoute: ProtectedBarangMasukRoute,
   ProtectedProductsIdRoute: ProtectedProductsIdRoute,
 }

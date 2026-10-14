@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import {
   ArrowDownLeft,
+  ArrowUpRight,
   ChevronRight,
   FlaskConical,
   LayoutDashboard,
@@ -62,6 +63,14 @@ function ProtectedLayout() {
           >
             <ArrowDownLeft aria-hidden="true" />
             Barang masuk
+          </Link>
+          <Link
+            to="/barang-keluar"
+            className="stock-nav-link"
+            activeProps={{ "aria-current": "page" }}
+          >
+            <ArrowUpRight aria-hidden="true" />
+            Barang keluar
           </Link>
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
             <FlaskConical className="size-4" aria-hidden="true" />
