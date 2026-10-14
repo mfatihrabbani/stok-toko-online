@@ -1,4 +1,9 @@
-import { demoProducts, formatNumber, type Product } from "@/lib/inventory";
+import {
+  demoProducts,
+  formatNumber,
+  sortLowStockProducts,
+  type Product,
+} from "@/lib/inventory";
 import { StockStatus } from "@/components/inventory/stock-status";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -7,7 +12,7 @@ export function LowStockList({
 }: {
   products?: Product[];
 }) {
-  const low = products.filter((item) => item.stock < item.minStock);
+  const low = sortLowStockProducts(products);
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -25,7 +30,8 @@ export function LowStockList({
             <h2 className="text-xl">Perlu ditangani</h2>
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Data contoh untuk pratinjau peringatan.
+            Produk habis ditampilkan lebih dulu, lalu stok yang paling jauh dari
+            batas aman. Data contoh.
           </p>
         </CardHeader>
         <CardContent>

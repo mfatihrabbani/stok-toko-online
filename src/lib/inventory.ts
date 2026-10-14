@@ -143,6 +143,17 @@ export function stockStatus(product: Pick<Product, "stock" | "minStock">) {
 
 export const formatNumber = (value: number) =>
   new Intl.NumberFormat("id-ID").format(value);
+export function sortLowStockProducts(products: Product[]) {
+  return products
+    .filter((item) => item.stock < item.minStock)
+    .sort(
+      (a, b) =>
+        a.stock / a.minStock - b.stock / b.minStock ||
+        b.minStock - b.stock - (a.minStock - a.stock) ||
+        a.name.localeCompare(b.name, "id-ID") ||
+        a.id.localeCompare(b.id),
+    );
+}
 
 export interface ProductFilters {
   query: string;
