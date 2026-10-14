@@ -21,6 +21,7 @@ import { Route as ProtectedAkunRouteImport } from './routes/_protected/akun'
 import { Route as ProtectedAppRouteImport } from './routes/_protected/app'
 import { Route as ProtectedBarangKeluarRouteImport } from './routes/_protected/barang-keluar'
 import { Route as ProtectedBarangMasukRouteImport } from './routes/_protected/barang-masuk'
+import { Route as ProtectedLaporanRouteImport } from './routes/_protected/laporan'
 import { Route as ProtectedPeringatanRouteImport } from './routes/_protected/peringatan'
 import { Route as ProtectedProdukRouteImport } from './routes/_protected/produk'
 import { Route as ProtectedRiwayatRouteImport } from './routes/_protected/riwayat'
@@ -98,6 +99,11 @@ const ProtectedBarangKeluarRoute = ProtectedBarangKeluarRouteImport.update({
 const ProtectedBarangMasukRoute = ProtectedBarangMasukRouteImport.update({
   id: '/barang-masuk',
   path: '/barang-masuk',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedLaporanRoute = ProtectedLaporanRouteImport.update({
+  id: '/laporan',
+  path: '/laporan',
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ProtectedPeringatanRoute = ProtectedPeringatanRouteImport.update({
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof ProtectedAppRoute
   '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
+  '/laporan': typeof ProtectedLaporanRoute
   '/peringatan': typeof ProtectedPeringatanRoute
   '/produk': typeof ProtectedProdukRoute
   '/riwayat': typeof ProtectedRiwayatRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/app': typeof ProtectedAppRoute
   '/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/barang-masuk': typeof ProtectedBarangMasukRoute
+  '/laporan': typeof ProtectedLaporanRoute
   '/peringatan': typeof ProtectedPeringatanRoute
   '/produk': typeof ProtectedProdukRoute
   '/riwayat': typeof ProtectedRiwayatRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/_protected/app': typeof ProtectedAppRoute
   '/_protected/barang-keluar': typeof ProtectedBarangKeluarRoute
   '/_protected/barang-masuk': typeof ProtectedBarangMasukRoute
+  '/_protected/laporan': typeof ProtectedLaporanRoute
   '/_protected/peringatan': typeof ProtectedPeringatanRoute
   '/_protected/produk': typeof ProtectedProdukRoute
   '/_protected/riwayat': typeof ProtectedRiwayatRoute
@@ -313,6 +322,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/barang-keluar'
     | '/barang-masuk'
+    | '/laporan'
     | '/peringatan'
     | '/produk'
     | '/riwayat'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/barang-keluar'
     | '/barang-masuk'
+    | '/laporan'
     | '/peringatan'
     | '/produk'
     | '/riwayat'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/_protected/app'
     | '/_protected/barang-keluar'
     | '/_protected/barang-masuk'
+    | '/_protected/laporan'
     | '/_protected/peringatan'
     | '/_protected/produk'
     | '/_protected/riwayat'
@@ -506,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/barang-masuk'
       fullPath: '/barang-masuk'
       preLoaderRoute: typeof ProtectedBarangMasukRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/laporan': {
+      id: '/_protected/laporan'
+      path: '/laporan'
+      fullPath: '/laporan'
+      preLoaderRoute: typeof ProtectedLaporanRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/peringatan': {
@@ -673,6 +692,7 @@ interface ProtectedRouteChildren {
   ProtectedAppRoute: typeof ProtectedAppRoute
   ProtectedBarangKeluarRoute: typeof ProtectedBarangKeluarRoute
   ProtectedBarangMasukRoute: typeof ProtectedBarangMasukRoute
+  ProtectedLaporanRoute: typeof ProtectedLaporanRoute
   ProtectedPeringatanRoute: typeof ProtectedPeringatanRoute
   ProtectedProdukRoute: typeof ProtectedProdukRoute
   ProtectedRiwayatRoute: typeof ProtectedRiwayatRoute
@@ -685,6 +705,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAppRoute: ProtectedAppRoute,
   ProtectedBarangKeluarRoute: ProtectedBarangKeluarRoute,
   ProtectedBarangMasukRoute: ProtectedBarangMasukRoute,
+  ProtectedLaporanRoute: ProtectedLaporanRoute,
   ProtectedPeringatanRoute: ProtectedPeringatanRoute,
   ProtectedProdukRoute: ProtectedProdukRoute,
   ProtectedRiwayatRoute: ProtectedRiwayatRoute,

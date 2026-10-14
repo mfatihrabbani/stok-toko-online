@@ -13,6 +13,7 @@ import {
   History,
   TriangleAlert,
   UserRound,
+  ChartColumn,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -86,6 +87,14 @@ function ProtectedLayout() {
             >
               <TriangleAlert aria-hidden="true" />
               Peringatan
+            </Link>
+            <Link
+              to="/laporan"
+              className="stock-nav-link"
+              activeProps={{ "aria-current": "page" }}
+            >
+              <ChartColumn aria-hidden="true" />
+              Laporan
             </Link>
             <Link
               to="/akun"
