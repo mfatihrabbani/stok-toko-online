@@ -142,13 +142,13 @@ test("a granted role reaches every account, and losing it revokes access", async
 test("the admin page renders only for a permitted role", async ({ page }) => {
   const email = `roles-${randomUUID()}@example.com`;
   await page.goto("/sign-up");
-  await page.getByLabel("Name").fill("Page Viewer");
+  await page.getByLabel("Nama pemilik atau toko").fill("Page Viewer");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill("Roles-test-password-123!");
+  await page.getByLabel("Kata sandi").fill("Roles-test-password-123!");
   const signupResponse = page.waitForResponse((response) =>
     response.url().endsWith("/api/auth/sign-up/email"),
   );
-  await page.getByRole("button", { name: "Create account" }).click();
+  await page.getByRole("button", { name: "Daftar akun toko" }).click();
   const response = await signupResponse;
   if (response.status() === 429) {
     const seconds = Number(response.headers()["retry-after"] || 10);
@@ -156,7 +156,7 @@ test("the admin page renders only for a permitted role", async ({ page }) => {
       true,
     );
     await delay((seconds + 0.1) * 1000);
-    await page.getByRole("button", { name: "Create account" }).click();
+    await page.getByRole("button", { name: "Daftar akun toko" }).click();
   }
   await expect(page).toHaveURL(/\/app$/);
 

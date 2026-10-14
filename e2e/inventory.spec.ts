@@ -8,6 +8,8 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
 }) => {
   test.setTimeout(90_000);
   const client = page.request;
+  await page.goto("/riwayat");
+  await expect(page).toHaveURL(/\/sign-in$/);
   expect((await client.get("/api/products")).status()).toBe(401);
   expect(
     (
