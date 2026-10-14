@@ -43,9 +43,10 @@ export async function createProduct(userId: string, input: CreateProductInput) {
   }
 }
 
-export async function recordIncoming(
+async function recordMovement(
   userId: string,
   input: IncomingStockInput,
+  direction: "in" | "out",
 ) {
   try {
     return await db.transaction(async (tx) => {
@@ -69,7 +70,7 @@ export async function recordIncoming(
             previous.productSku === input.newProduct?.sku;
         if (
           !sameProduct ||
-          previous.direction !== "in" ||
+          previous.direction !== direction ||
           previous.quantity !== input.quantity ||
           previous.note !== input.note
         )
@@ -113,7 +114,13 @@ export async function recordIncoming(
             .for("update");
       if (!product)
         throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
-      const after = product.stock + input.quantity;
+      const after =
+        product.stock + input.quantity * (direction === "out" ? -1 : 1);
+      if (after < 0)
+        throw new InventoryError(
+          "INVALID_STOCK",
+          `Stok tidak cukup. Tersedia ${product.stock} ${product.unit}.`,
+        );
       if (!Number.isSafeInteger(after) || after > 2147483647)
         throw new InventoryError(
           "INVALID_STOCK",
@@ -131,7 +138,7 @@ export async function recordIncoming(
           productId: product.id,
           productName: product.name,
           productSku: product.sku,
-          direction: "in",
+          direction,
           quantity: input.quantity,
           stockBefore: product.stock,
           stockAfter: after,
@@ -157,6 +164,16 @@ export async function recordIncoming(
       );
     throw error;
   }
+}
+
+export function recordIncoming(userId: string, input: IncomingStockInput) {
+  return recordMovement(userId, input, "in");
+}
+export function recordOutgoing(
+  userId: string,
+  input: import("@/validators/inventory").OutgoingStockInput,
+) {
+  return recordMovement(userId, input, "out");
 }
 
 export async function getInventory(userId: string) {

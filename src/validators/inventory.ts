@@ -35,3 +35,12 @@ export const incomingStockSchema = z
     "Pilih produk yang ada atau isi satu produk baru.",
   );
 export type IncomingStockInput = z.infer<typeof incomingStockSchema>;
+export const outgoingStockSchema = z
+  .object({
+    productId: inventoryIdSchema,
+    quantity: z.number().int().min(1).max(2147483647),
+    note: z.string().trim().max(300).default(""),
+    requestId: z.string().uuid(),
+  })
+  .strict();
+export type OutgoingStockInput = z.infer<typeof outgoingStockSchema>;
