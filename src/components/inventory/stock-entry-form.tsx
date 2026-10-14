@@ -26,11 +26,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import {
   defaultProductFilters,
-  demoProducts,
   filterProducts,
   formatNumber,
 } from "@/lib/inventory";
 import type { StockSearch } from "@/lib/stock-search";
+import { useInventory } from "@/lib/use-inventory";
 
 export function StockEntryForm({
   initialProductId,
@@ -42,7 +42,8 @@ export function StockEntryForm({
   direction?: "in" | "out";
 }) {
   const outgoing = direction === "out";
-  const [products, setProducts] = useState(demoProducts);
+  const { products: savedProducts } = useInventory();
+  const [products, setProducts] = useState(savedProducts);
   const [addingProduct, setAddingProduct] = useState(false);
   const [productId, setProductId] = useState(
     initialProductId && products.some((item) => item.id === initialProductId)
