@@ -6,6 +6,8 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/products/1");
+  await expect(page).toHaveURL(/\/sign-in$/);
   const signup = {
     headers: { Origin: "http://localhost:3101" },
     data: {
@@ -70,6 +72,27 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
     path: "test-results/stock-desktop.png",
     fullPage: true,
   });
+  await page
+    .getByRole("link", { name: "Canvas Tote Bag", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/products\/1$/);
+  await expect(
+    page.getByRole("heading", { name: "Canvas Tote Bag", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Stok memenuhi batas minimal.", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Canvas Tote Bag", exact: true }),
+  ).toBeVisible();
+  await page.goto("/products/not-a-product");
+  await expect(
+    page.getByRole("heading", { name: "Produk tidak ditemukan" }),
+  ).toBeVisible();
+  await page
+    .getByRole("link", { name: "Kembali ke stok", exact: true })
+    .click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(
     page.getByRole("heading", { name: "Stok barang", exact: true }),

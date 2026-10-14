@@ -403,3 +403,20 @@
     width: 100%;
   }
 }
+@media (max-width: 780px) {
+  .stock-table tr {
+    position: relative;
+  }
+  .stock-table .product-cell {
+    padding-inline-end: 40px;
+  }
+  .stock-table .action-cell {
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-end: 10px;
+  }
+  .stock-table .action-cell a {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
