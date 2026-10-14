@@ -147,8 +147,43 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
     ).data,
   ).toHaveLength(3);
   const stranger = await playwright.request.newContext({
+    // A fulfilled restock clears handling, including when stock equals its minimum.
     baseURL: headers.Origin,
   });
+  expect(
+    (
+      await client.post(`/api/products/${product.id}/handled`, {
+        headers,
+        data: {},
+      })
+    ).status(),
+  ).toBe(200);
+  expect(
+    (await (await client.get("/api/products/low-stock")).json()).data,
+  ).toEqual([]);
+  expect(
+    (await (await client.get("/api/products/low-stock?status=handled")).json())
+      .data,
+  ).toHaveLength(1);
+  expect(
+    (
+      await client.post("/api/stock/incoming", {
+        headers,
+        data: { productId: product.id, quantity: 1, requestId: randomUUID() },
+      })
+    ).status(),
+  ).toBe(201);
+  expect(
+    (
+      await client.post("/api/stock/outgoing", {
+        headers,
+        data: { productId: product.id, quantity: 1, requestId: randomUUID() },
+      })
+    ).status(),
+  ).toBe(201);
+  expect(
+    (await (await client.get("/api/products/low-stock")).json()).data,
+  ).toHaveLength(1);
   try {
     expect(
       (
