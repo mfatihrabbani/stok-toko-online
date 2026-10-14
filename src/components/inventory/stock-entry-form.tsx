@@ -31,6 +31,7 @@ import {
 } from "@/lib/inventory";
 import type { StockSearch } from "@/lib/stock-search";
 import { useInventory } from "@/lib/use-inventory";
+import { inventoryRequest, type MovementResult } from "@/lib/inventory-client";
 
 export function StockEntryForm({
   initialProductId,
@@ -42,7 +43,7 @@ export function StockEntryForm({
   direction?: "in" | "out";
 }) {
   const outgoing = direction === "out";
-  const { products: savedProducts } = useInventory();
+  const { products: savedProducts, refresh } = useInventory();
   const [products, setProducts] = useState(savedProducts);
   const [addingProduct, setAddingProduct] = useState(false);
   const [productId, setProductId] = useState(
@@ -72,6 +73,8 @@ export function StockEntryForm({
     message: string;
   }>();
   const savingRef = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const requestRef = useRef<{ signature: string; id: string } | null>(null);
   const [errors, setErrors] = useState<{ product?: string; quantity?: string }>(
     {},
   );
@@ -93,20 +96,41 @@ export function StockEntryForm({
       (outgoing ? (product?.stock ?? 0) : 2147483647 - (product?.stock ?? 0));
   const after =
     (product?.stock ?? 0) + (valid ? amount * (outgoing ? -1 : 1) : 0);
-  function save() {
+  async function save() {
     if (savingRef.current) return;
     savingRef.current = true;
+    setSaving(true);
     try {
       if (!product || !valid)
         throw new Error("Periksa kembali produk dan jumlah barang.");
-      setProducts((current) =>
-        current.map((item) =>
-          item.id === product.id ? { ...item, stock: after } : item,
-        ),
+      const newProduct = !savedProducts.some((item) => item.id === product.id)
+        ? {
+            name: product.name,
+            sku: product.sku,
+            category: product.category,
+            minStock: product.minStock,
+            unit: product.unit,
+          }
+        : undefined;
+      const body = {
+        ...(newProduct ? { newProduct } : { productId: product.id }),
+        quantity: amount,
+        note: note.trim(),
+      };
+      const signature = JSON.stringify({ direction, ...body });
+      if (requestRef.current?.signature !== signature)
+        requestRef.current = { signature, id: crypto.randomUUID() };
+      const result = await inventoryRequest<MovementResult>(
+        outgoing ? "/api/stock/outgoing" : "/api/stock/incoming",
+        { method: "POST", body: { ...body, requestId: requestRef.current.id } },
       );
+      setProducts((current) =>
+        current.map((item) => (item.id === product.id ? result.product : item)),
+      );
+      setProductId(result.product.id);
       setFeedback({
         kind: "success",
-        message: `${formatNumber(amount)} ${product.unit} ${product.name} berhasil dicatat ${outgoing ? "keluar" : "masuk"}. Stok contoh kini ${formatNumber(after)} ${product.unit}.`,
+        message: `${formatNumber(result.receipt.quantity)} ${result.product.unit} ${result.product.name} berhasil dicatat ${outgoing ? "keluar" : "masuk"}. Stok kini ${formatNumber(result.receipt.stockAfter)} ${result.product.unit}.`,
       });
       setReviewing(false);
       setQuantity("");
@@ -114,6 +138,8 @@ export function StockEntryForm({
       setProductQuery("");
       setErrors({});
       setAddingProduct(false);
+      requestRef.current = null;
+      void refresh().catch(() => {});
     } catch (error) {
       setReviewing(false);
       setFeedback({
@@ -121,10 +147,11 @@ export function StockEntryForm({
         message:
           error instanceof Error
             ? error.message
-            : "Catatan belum tersimpan. Coba lagi; isian kamu tetap ada.",
+            : "Catatan belum tersimpan. Coba lagi; isian Anda tetap ada.",
       });
     } finally {
       savingRef.current = false;
+      setSaving(false);
     }
   }
   function review(event: FormEvent<HTMLFormElement>) {
@@ -415,13 +442,16 @@ export function StockEntryForm({
         quantity={amount}
         note={note}
         open={reviewing}
-        onOpenChange={setReviewing}
+        onOpenChange={(open) => {
+          if (!saving) setReviewing(open);
+        }}
         onCloseFocus={() =>
           feedback?.kind === "success"
             ? quantityRef.current?.focus()
             : reviewRef.current?.focus()
         }
         onConfirm={save}
+        saving={saving}
         direction={direction}
       />
     </div>

@@ -47,81 +47,116 @@ export async function recordIncoming(
   userId: string,
   input: IncomingStockInput,
 ) {
-  return db.transaction(async (tx) => {
-    const [product] = await tx
-      .select(productFields)
-      .from(products)
-      .where(and(eq(products.id, input.productId), eq(products.userId, userId)))
-      .for("update");
-    if (!product)
-      throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
-    const [previous] = await tx
-      .select()
-      .from(stockMovements)
-      .where(
-        and(
-          eq(stockMovements.userId, userId),
-          eq(stockMovements.requestId, input.requestId),
-        ),
-      )
-      .limit(1);
-    if (previous) {
-      if (
-        previous.productId !== input.productId ||
-        previous.direction !== "in" ||
-        previous.quantity !== input.quantity ||
-        previous.note !== input.note
-      )
+  try {
+    return await db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtextextended(${userId + ":" + input.requestId}, 0))`,
+      );
+      const [previous] = await tx
+        .select()
+        .from(stockMovements)
+        .where(
+          and(
+            eq(stockMovements.userId, userId),
+            eq(stockMovements.requestId, input.requestId),
+          ),
+        )
+        .limit(1);
+      if (previous) {
+        const sameProduct = input.productId
+          ? previous.productId === input.productId
+          : previous.productName === input.newProduct?.name &&
+            previous.productSku === input.newProduct?.sku;
+        if (
+          !sameProduct ||
+          previous.direction !== "in" ||
+          previous.quantity !== input.quantity ||
+          previous.note !== input.note
+        )
+          throw new InventoryError(
+            "REQUEST_CONFLICT",
+            "Identitas catatan telah dipakai. Tinjau ulang isian sebelum menyimpan.",
+          );
+        const [product] = await tx
+          .select(productFields)
+          .from(products)
+          .where(
+            and(
+              eq(products.id, previous.productId),
+              eq(products.userId, userId),
+            ),
+          );
+        return {
+          product: { ...product, updatedAt: product.updatedAt.toISOString() },
+          receipt: {
+            id: previous.id,
+            stockBefore: previous.stockBefore,
+            stockAfter: previous.stockAfter,
+            quantity: previous.quantity,
+          },
+        };
+      }
+      const [product] = input.newProduct
+        ? await tx
+            .insert(products)
+            .values({ ...input.newProduct, userId })
+            .returning(productFields)
+        : await tx
+            .select(productFields)
+            .from(products)
+            .where(
+              and(
+                eq(products.id, input.productId!),
+                eq(products.userId, userId),
+              ),
+            )
+            .for("update");
+      if (!product)
+        throw new InventoryError("NOT_FOUND", "Produk tidak ditemukan.");
+      const after = product.stock + input.quantity;
+      if (!Number.isSafeInteger(after) || after > 2147483647)
         throw new InventoryError(
-          "REQUEST_CONFLICT",
-          "Identitas catatan telah dipakai. Tinjau ulang isian sebelum menyimpan.",
+          "INVALID_STOCK",
+          "Jumlah masuk terlalu besar untuk stok produk ini.",
         );
+      const [updated] = await tx
+        .update(products)
+        .set({ stock: after })
+        .where(and(eq(products.id, product.id), eq(products.userId, userId)))
+        .returning(productFields);
+      const [movement] = await tx
+        .insert(stockMovements)
+        .values({
+          userId,
+          productId: product.id,
+          productName: product.name,
+          productSku: product.sku,
+          direction: "in",
+          quantity: input.quantity,
+          stockBefore: product.stock,
+          stockAfter: after,
+          note: input.note,
+          requestId: input.requestId,
+        })
+        .returning({ id: stockMovements.id });
       return {
-        product: { ...product, updatedAt: product.updatedAt.toISOString() },
+        product: { ...updated, updatedAt: updated.updatedAt.toISOString() },
         receipt: {
-          id: previous.id,
-          stockBefore: previous.stockBefore,
-          stockAfter: previous.stockAfter,
-          quantity: previous.quantity,
+          id: movement.id,
+          stockBefore: product.stock,
+          stockAfter: after,
+          quantity: input.quantity,
         },
       };
-    }
-    const after = product.stock + input.quantity;
-    if (!Number.isSafeInteger(after) || after > 2147483647)
+    });
+  } catch (error) {
+    if (databaseCode(error) === "23505")
       throw new InventoryError(
-        "INVALID_STOCK",
-        "Jumlah masuk terlalu besar untuk stok produk ini.",
+        "SKU_EXISTS",
+        "SKU sudah dipakai produk lain di toko Anda.",
       );
-    const [updated] = await tx
-      .update(products)
-      .set({ stock: after })
-      .where(and(eq(products.id, product.id), eq(products.userId, userId)))
-      .returning(productFields);
-    const [movement] = await tx
-      .insert(stockMovements)
-      .values({
-        userId,
-        productId: product.id,
-        productName: product.name,
-        productSku: product.sku,
-        direction: "in",
-        quantity: input.quantity,
-        stockBefore: product.stock,
-        stockAfter: after,
-        note: input.note,
-        requestId: input.requestId,
-      })
-      .returning({ id: stockMovements.id });
-    return {
-      product: { ...updated, updatedAt: updated.updatedAt.toISOString() },
-      receipt: {
-        id: movement.id,
-        stockBefore: product.stock,
-        stockAfter: after,
-        quantity: input.quantity,
-      },
-    };
-  });
+    throw error;
+  }
 }
 
 export async function getInventory(userId: string) {

@@ -23,10 +23,15 @@ export const listProductsSchema = z
 export type ListProductsInput = z.infer<typeof listProductsSchema>;
 export const incomingStockSchema = z
   .object({
-    productId: inventoryIdSchema,
+    productId: inventoryIdSchema.optional(),
+    newProduct: createProductSchema.optional(),
     quantity: z.number().int().min(1).max(2147483647),
     note: z.string().trim().max(300).default(""),
     requestId: z.string().uuid(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (value) => Boolean(value.productId) !== Boolean(value.newProduct),
+    "Pilih produk yang ada atau isi satu produk baru.",
+  );
 export type IncomingStockInput = z.infer<typeof incomingStockSchema>;

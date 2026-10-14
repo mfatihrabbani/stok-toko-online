@@ -18,6 +18,7 @@ export function StockConfirmation({
   onCloseFocus,
   onConfirm,
   direction = "in",
+  saving = false,
 }: {
   product?: Product;
   quantity: number;
@@ -27,6 +28,7 @@ export function StockConfirmation({
   onCloseFocus: () => void;
   onConfirm?: () => void;
   direction?: "in" | "out";
+  saving?: boolean;
 }) {
   if (!product) return null;
   const newStock = product.stock + quantity * (direction === "out" ? -1 : 1);
@@ -93,12 +95,22 @@ export function StockConfirmation({
           mencatatnya di riwayat.
         </p>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            disabled={saving}
+            onClick={() => onOpenChange(false)}
+          >
             Ubah catatan
           </Button>
           {onConfirm && (
-            <Button onClick={onConfirm} disabled={!valid}>
-              Simpan barang {direction === "out" ? "keluar" : "masuk"}
+            <Button
+              onClick={onConfirm}
+              disabled={!valid || saving}
+              aria-busy={saving}
+            >
+              {saving
+                ? "Menyimpan..."
+                : `Simpan barang ${direction === "out" ? "keluar" : "masuk"}`}
             </Button>
           )}
         </DialogFooter>
