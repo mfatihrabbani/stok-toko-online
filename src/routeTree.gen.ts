@@ -29,6 +29,7 @@ import { Route as ApiStockIncomingRouteImport } from './routes/api/stock/incomin
 import { Route as ApiStockOutgoingRouteImport } from './routes/api/stock/outgoing'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
+import { Route as ApiStockMovementsIndexRouteImport } from './routes/api/stock/movements/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -128,6 +129,11 @@ const ApiAdminNotesIdRoute = ApiAdminNotesIdRouteImport.update({
   path: '/api/admin/notes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStockMovementsIndexRoute = ApiStockMovementsIndexRouteImport.update({
+  id: '/api/stock/movements/',
+  path: '/api/stock/movements/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
+  '/api/stock/movements/': typeof ApiStockMovementsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/api/products': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes': typeof ApiAdminNotesIndexRoute
+  '/api/stock/movements': typeof ApiStockMovementsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
+  '/api/stock/movements/': typeof ApiStockMovementsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/api/products/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
+    | '/api/stock/movements/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/api/products'
     | '/api/admin/notes/$id'
     | '/api/admin/notes'
+    | '/api/stock/movements'
   id:
     | '__root__'
     | '/'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/api/products/'
     | '/api/admin/notes/$id'
     | '/api/admin/notes/'
+    | '/api/stock/movements/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   ApiProductsIndexRoute: typeof ApiProductsIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
   ApiAdminNotesIndexRoute: typeof ApiAdminNotesIndexRoute
+  ApiStockMovementsIndexRoute: typeof ApiStockMovementsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminNotesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stock/movements/': {
+      id: '/api/stock/movements/'
+      path: '/api/stock/movements'
+      fullPath: '/api/stock/movements/'
+      preLoaderRoute: typeof ApiStockMovementsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -464,6 +484,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProductsIndexRoute: ApiProductsIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,
   ApiAdminNotesIndexRoute: ApiAdminNotesIndexRoute,
+  ApiStockMovementsIndexRoute: ApiStockMovementsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

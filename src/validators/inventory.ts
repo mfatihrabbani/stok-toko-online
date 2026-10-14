@@ -44,3 +44,12 @@ export const outgoingStockSchema = z
   })
   .strict();
 export type OutgoingStockInput = z.infer<typeof outgoingStockSchema>;
+export const listMovementsSchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(1000).default(50),
+    offset: z.coerce.number().int().min(0).max(1_000_000).default(0),
+    direction: z.enum(["in", "out"]).optional(),
+    productId: inventoryIdSchema.optional(),
+  })
+  .strict();
+export type ListMovementsInput = z.infer<typeof listMovementsSchema>;

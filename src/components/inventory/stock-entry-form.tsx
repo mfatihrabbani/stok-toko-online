@@ -156,6 +156,12 @@ export function StockEntryForm({
       void refresh().catch(() => {});
     } catch (error) {
       setReviewing(false);
+      if (product && !draftIdsRef.current.has(product.id)) {
+        setProducts((current) =>
+          current.filter((item) => item.id !== product.id),
+        );
+        void refresh().catch(() => {});
+      }
       setFeedback({
         kind: "error",
         message:

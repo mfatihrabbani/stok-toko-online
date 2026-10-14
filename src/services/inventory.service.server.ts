@@ -19,6 +19,50 @@ export const productFields = {
   unit: products.unit,
   updatedAt: products.updatedAt,
 };
+export const movementFields = {
+  id: stockMovements.id,
+  productId: stockMovements.productId,
+  productName: stockMovements.productName,
+  productSku: stockMovements.productSku,
+  direction: stockMovements.direction,
+  quantity: stockMovements.quantity,
+  note: stockMovements.note,
+  stockBefore: stockMovements.stockBefore,
+  stockAfter: stockMovements.stockAfter,
+  createdAt: stockMovements.createdAt,
+};
+export async function listMovements(
+  userId: string,
+  input: import("@/validators/inventory").ListMovementsInput,
+) {
+  const rows = await db
+    .select(movementFields)
+    .from(stockMovements)
+    .where(
+      and(
+        eq(stockMovements.userId, userId),
+        input.direction
+          ? eq(stockMovements.direction, input.direction)
+          : undefined,
+        input.productId
+          ? eq(stockMovements.productId, input.productId)
+          : undefined,
+      ),
+    )
+    .orderBy(desc(stockMovements.createdAt), desc(stockMovements.id))
+    .limit(input.limit + 1)
+    .offset(input.offset);
+  return {
+    data: rows
+      .slice(0, input.limit)
+      .map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })),
+    meta: {
+      limit: input.limit,
+      offset: input.offset,
+      hasMore: rows.length > input.limit,
+    },
+  };
+}
 
 function databaseCode(error: unknown): string | undefined {
   if (!error || typeof error !== "object") return undefined;
