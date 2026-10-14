@@ -105,7 +105,7 @@ export function StockEntryForm({
       );
       setFeedback({
         kind: "success",
-        message: `${formatNumber(amount)} ${product.unit} ${product.name} berhasil dicatat. Stok contoh kini ${formatNumber(after)} ${product.unit}.`,
+        message: `${formatNumber(amount)} ${product.unit} ${product.name} berhasil dicatat ${outgoing ? "keluar" : "masuk"}. Stok contoh kini ${formatNumber(after)} ${product.unit}.`,
       });
       setReviewing(false);
       setQuantity("");
@@ -128,6 +128,7 @@ export function StockEntryForm({
   }
   function review(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFeedback(undefined);
     if (addingProduct) return;
     const nextErrors: typeof errors = {};
     if (!product) nextErrors.product = "Pilih produk sebelum melanjutkan.";
@@ -414,7 +415,11 @@ export function StockEntryForm({
         note={note}
         open={reviewing}
         onOpenChange={setReviewing}
-        onCloseFocus={() => reviewRef.current?.focus()}
+        onCloseFocus={() =>
+          feedback?.kind === "success"
+            ? quantityRef.current?.focus()
+            : reviewRef.current?.focus()
+        }
         onConfirm={save}
         direction={direction}
       />
