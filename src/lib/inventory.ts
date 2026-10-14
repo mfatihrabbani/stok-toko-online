@@ -142,3 +142,32 @@ export function stockStatus(product: Pick<Product, "stock" | "minStock">) {
 
 export const formatNumber = (value: number) =>
   new Intl.NumberFormat("id-ID").format(value);
+
+export interface ProductFilters {
+  query: string;
+  category: string;
+  status: "all" | "low" | "empty";
+}
+
+export const defaultProductFilters: ProductFilters = {
+  query: "",
+  category: "all",
+  status: "all",
+};
+
+export function filterProducts(products: Product[], filters: ProductFilters) {
+  const query = filters.query.trim().toLocaleLowerCase("id-ID");
+  return products.filter((product) => {
+    const matchesQuery = `${product.name} ${product.sku}`
+      .toLocaleLowerCase("id-ID")
+      .includes(query);
+    const matchesCategory =
+      filters.category === "all" || product.category === filters.category;
+    const status = stockStatus(product);
+    const matchesStatus =
+      filters.status === "all" ||
+      (filters.status === "low" && status === "Menipis") ||
+      (filters.status === "empty" && status === "Habis");
+    return matchesQuery && matchesCategory && matchesStatus;
+  });
+}

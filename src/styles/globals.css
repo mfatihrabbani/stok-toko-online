@@ -18,6 +18,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--secondary);
   --color-accent-foreground: var(--foreground);
+  --color-input: var(--border);
+  --color-accent-foreground: var(--foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--border);
@@ -341,4 +343,19 @@
 }
 .stock-table tr[data-status="Habis"] strong {
   color: var(--destructive);
+}
+.stock-filters [data-slot="native-select-wrapper"] {
+  width: 100%;
+}
+.stock-filters [data-slot="input-group"],
+.stock-filters [data-slot="native-select"],
+.stock-filters [data-slot="toggle-group-item"] {
+  min-height: 40px;
+}
+@media (max-width: 780px) {
+  .stock-filters [data-slot="input-group"],
+  .stock-filters [data-slot="native-select"],
+  .stock-filters [data-slot="toggle-group-item"] {
+    min-height: 44px;
+  }
 }

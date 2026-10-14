@@ -32,6 +32,34 @@ test("stock page shows inventory after signup and fits desktop and mobile", asyn
   await expect(
     page.getByRole("cell", { name: "Habis", exact: true }),
   ).toBeVisible();
+  await page.getByLabel("Cari produk", { exact: true }).fill("acc-001");
+  await expect(page.getByRole("status")).toHaveText(
+    "Menampilkan 1 dari 12 produk",
+  );
+  await expect(
+    page.getByRole("cell", { name: "Canvas Tote Bag ACC-001" }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Cari produk", { exact: true })
+    .fill("Produk yang tidak ada");
+  await expect(
+    page.getByRole("heading", { name: "Produk tidak ditemukan" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Reset pencarian dan filter" })
+    .click();
+  await page.getByLabel("Kategori", { exact: true }).selectOption("Pakaian");
+  await page.getByRole("radio", { name: "Menipis 3", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText(
+    "Menampilkan 1 dari 12 produk",
+  );
+  await expect(
+    page.getByRole("cell", { name: "Topi Baseball — Hitam PKN-002" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Reset filter", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText(
+    "Menampilkan 12 dari 12 produk",
+  );
   await page.screenshot({
     path: "test-results/stock-desktop.png",
     fullPage: true,

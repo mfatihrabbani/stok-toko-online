@@ -1,5 +1,6 @@
 ﻿import { Check, PackageX, TriangleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,13 +13,24 @@ import {
 import { formatNumber, stockStatus, type Product } from "@/lib/inventory";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 
-export function StockTable({ products }: { products: Product[] }) {
+export function StockTable({
+  products,
+  emptyTitle = "Belum ada produk",
+  emptyDescription = "Produk pertama yang Anda tambahkan akan muncul di daftar ini.",
+  onReset,
+}: {
+  products: Product[];
+  emptyTitle?: string;
+  emptyDescription?: string;
+  onReset?: () => void;
+}) {
   if (products.length === 0) {
     return (
       <Empty className="min-h-64">
@@ -30,12 +42,17 @@ export function StockTable({ products }: { products: Product[] }) {
             />
           </EmptyMedia>
           <EmptyTitle>
-            <h3>Belum ada produk</h3>
+            <h3>{emptyTitle}</h3>
           </EmptyTitle>
-          <EmptyDescription>
-            Produk pertama yang Anda tambahkan akan muncul di daftar ini.
-          </EmptyDescription>
+          <EmptyDescription>{emptyDescription}</EmptyDescription>
         </EmptyHeader>
+        {onReset && (
+          <EmptyContent>
+            <Button variant="outline" onClick={onReset}>
+              Reset pencarian dan filter
+            </Button>
+          </EmptyContent>
+        )}
       </Empty>
     );
   }
