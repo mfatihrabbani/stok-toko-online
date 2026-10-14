@@ -33,6 +33,14 @@ export const movementFields = {
   stockAfter: stockMovements.stockAfter,
   createdAt: stockMovements.createdAt,
 };
+export async function getMovement(userId: string, id: string) {
+  const [row] = await db
+    .select(movementFields)
+    .from(stockMovements)
+    .where(and(eq(stockMovements.id, id), eq(stockMovements.userId, userId)))
+    .limit(1);
+  return row ? { ...row, createdAt: row.createdAt.toISOString() } : null;
+}
 export async function listMovements(
   userId: string,
   input: import("@/validators/inventory").ListMovementsInput,

@@ -85,6 +85,65 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
   const detail = await (await client.get(`/api/products/${product.id}`)).json();
   expect(detail.data.product.stock).toBe(4);
   expect(detail.data.movements).toHaveLength(3);
+  const minimum = await client.patch(`/api/products/${product.id}`, {
+    headers,
+    data: { minStock: 5 },
+  });
+  expect((await minimum.json()).data.lowStock).toBe(true);
+  expect(
+    (
+      await client.patch(`/api/products/${product.id}`, {
+        headers,
+        data: { stock: 99 },
+      })
+    ).status(),
+  ).toBe(422);
+  const category = (
+    await (
+      await client.post("/api/categories", { headers, data: { name: "Kado" } })
+    ).json()
+  ).data;
+  expect(
+    (
+      await client.patch(`/api/products/${product.id}`, {
+        headers,
+        data: { category: category.name },
+      })
+    ).status(),
+  ).toBe(200);
+  expect(
+    (
+      await client.patch(`/api/categories/${category.id}`, {
+        headers,
+        data: { name: "Hadiah" },
+      })
+    ).status(),
+  ).toBe(200);
+  expect(
+    (await (await client.get(`/api/products/${product.id}`)).json()).data
+      .product.category,
+  ).toBe("Hadiah");
+  expect(
+    (
+      await client.delete(`/api/categories/${category.id}`, { headers })
+    ).status(),
+  ).toBe(204);
+  expect(
+    (await (await client.get(`/api/products/${product.id}`)).json()).data
+      .product.category,
+  ).toBe("Tanpa kategori");
+  const day = new Date(
+    Date.parse(detail.data.movements[0].createdAt) + 7 * 60 * 60 * 1000,
+  )
+    .toISOString()
+    .slice(0, 10);
+  expect(
+    (
+      await (
+        await client.get(`/api/stock/movements?from=${day}&to=${day}`)
+      ).json()
+    ).data,
+  ).toHaveLength(3);
   const stranger = await playwright.request.newContext({
     baseURL: headers.Origin,
   });
@@ -131,4 +190,13 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
   } finally {
     await stranger.dispose();
   }
+  expect(
+    (await client.delete(`/api/products/${product.id}`, { headers })).status(),
+  ).toBe(204);
+  expect((await (await client.get("/api/products")).json()).data).toEqual([]);
+  expect(
+    (
+      await client.get(`/api/stock/movements/${detail.data.movements[0].id}`)
+    ).status(),
+  ).toBe(200);
 });

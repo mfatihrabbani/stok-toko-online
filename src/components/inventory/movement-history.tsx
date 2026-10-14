@@ -49,6 +49,9 @@ export function MovementHistory({
 }) {
   const [localFilters, setFilters] = useState(defaultMovementFilters);
   const filters = externalFilters ?? localFilters;
+  const filtered = Boolean(
+    filters.q || filters.from || filters.to || filters.direction !== "all",
+  );
   const [selected, setSelected] = useState<StockMovement>();
   const detailTrigger = useRef<HTMLButtonElement | null>(null);
   const movements = filterMovements(initialMovements, filters).sort(
@@ -101,12 +104,12 @@ export function MovementHistory({
             <Empty className="min-h-64">
               <EmptyHeader>
                 <EmptyTitle>
-                  {initialMovements.length
+                  {initialMovements.length || filtered
                     ? "Tidak ada catatan yang cocok"
                     : "Belum ada pergerakan stok"}
                 </EmptyTitle>
                 <EmptyDescription>
-                  {initialMovements.length
+                  {initialMovements.length || filtered
                     ? "Ubah rentang tanggal, pencarian, atau jenis pergerakan."
                     : "Catat barang masuk atau keluar. Setiap perubahan stok akan muncul di sini."}
                 </EmptyDescription>

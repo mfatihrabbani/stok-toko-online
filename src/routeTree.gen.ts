@@ -34,6 +34,7 @@ import { Route as ApiStockOutgoingRouteImport } from './routes/api/stock/outgoin
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
 import { Route as ApiAdminNotesIdRouteImport } from './routes/api/admin/notes/$id'
 import { Route as ApiStockMovementsIndexRouteImport } from './routes/api/stock/movements/index'
+import { Route as ApiStockMovementsIdRouteImport } from './routes/api/stock/movements/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -158,6 +159,11 @@ const ApiStockMovementsIndexRoute = ApiStockMovementsIndexRouteImport.update({
   path: '/api/stock/movements/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStockMovementsIdRoute = ApiStockMovementsIdRouteImport.update({
+  id: '/api/stock/movements/$id',
+  path: '/api/stock/movements/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -181,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/stock/movements/$id': typeof ApiStockMovementsIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
   '/api/stock/movements/': typeof ApiStockMovementsIndexRoute
 }
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/api/notes': typeof ApiNotesIndexRoute
   '/api/products': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/stock/movements/$id': typeof ApiStockMovementsIdRoute
   '/api/admin/notes': typeof ApiAdminNotesIndexRoute
   '/api/stock/movements': typeof ApiStockMovementsIndexRoute
 }
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/api/notes/': typeof ApiNotesIndexRoute
   '/api/products/': typeof ApiProductsIndexRoute
   '/api/admin/notes/$id': typeof ApiAdminNotesIdRoute
+  '/api/stock/movements/$id': typeof ApiStockMovementsIdRoute
   '/api/admin/notes/': typeof ApiAdminNotesIndexRoute
   '/api/stock/movements/': typeof ApiStockMovementsIndexRoute
 }
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
+    | '/api/stock/movements/$id'
     | '/api/admin/notes/'
     | '/api/stock/movements/'
   fileRoutesByTo: FileRoutesByTo
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/api/notes'
     | '/api/products'
     | '/api/admin/notes/$id'
+    | '/api/stock/movements/$id'
     | '/api/admin/notes'
     | '/api/stock/movements'
   id:
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/api/notes/'
     | '/api/products/'
     | '/api/admin/notes/$id'
+    | '/api/stock/movements/$id'
     | '/api/admin/notes/'
     | '/api/stock/movements/'
   fileRoutesById: FileRoutesById
@@ -332,6 +344,7 @@ export interface RootRouteChildren {
   ApiNotesIndexRoute: typeof ApiNotesIndexRoute
   ApiProductsIndexRoute: typeof ApiProductsIndexRoute
   ApiAdminNotesIdRoute: typeof ApiAdminNotesIdRoute
+  ApiStockMovementsIdRoute: typeof ApiStockMovementsIdRoute
   ApiAdminNotesIndexRoute: typeof ApiAdminNotesIndexRoute
   ApiStockMovementsIndexRoute: typeof ApiStockMovementsIndexRoute
 }
@@ -513,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStockMovementsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stock/movements/$id': {
+      id: '/api/stock/movements/$id'
+      path: '/api/stock/movements/$id'
+      fullPath: '/api/stock/movements/$id'
+      preLoaderRoute: typeof ApiStockMovementsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -567,6 +587,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiNotesIndexRoute: ApiNotesIndexRoute,
   ApiProductsIndexRoute: ApiProductsIndexRoute,
   ApiAdminNotesIdRoute: ApiAdminNotesIdRoute,
+  ApiStockMovementsIdRoute: ApiStockMovementsIdRoute,
   ApiAdminNotesIndexRoute: ApiAdminNotesIndexRoute,
   ApiStockMovementsIndexRoute: ApiStockMovementsIndexRoute,
 }
