@@ -4,6 +4,9 @@ import { demoMovements, type StockMovement } from "@/lib/movements";
 import { StockSummary } from "./stock-summary";
 import { ReportMovements } from "./report-movements";
 import { ReportMovementChart, ReportTotals } from "./report-totals";
+import { ReportProductTotals } from "./report-product-totals";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { groupReportMovements } from "@/lib/reports";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +30,7 @@ export function ReportView({
   onPeriodChange?: (period: ReportPeriod) => void;
 }) {
   const [localPeriod, setPeriod] = useState(defaultReportPeriod);
+  const [view, setView] = useState<"all" | "products">("all");
   const period = externalPeriod ?? localPeriod;
   const changePeriod = onPeriodChange ?? setPeriod;
   const invalidPeriod = period.from > period.to;
@@ -122,6 +126,18 @@ export function ReportView({
           <CardTitle>
             <h2 className="text-xl">Masuk & keluar pada periode ini</h2>
           </CardTitle>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            value={view}
+            aria-label="Tampilan laporan"
+            onValueChange={(value) => {
+              if (value === "all" || value === "products") setView(value);
+            }}
+          >
+            <ToggleGroupItem value="all">Keseluruhan</ToggleGroupItem>
+            <ToggleGroupItem value="products">Per produk</ToggleGroupItem>
+          </ToggleGroup>
         </CardHeader>
         <CardContent>
           <ReportMovementChart incoming={incoming} outgoing={outgoing} />
@@ -134,7 +150,13 @@ export function ReportView({
           </p>
         </CardContent>
         <CardContent className="px-0">
-          <ReportMovements movements={periodMovements} />
+          {view === "all" ? (
+            <ReportMovements movements={periodMovements} />
+          ) : (
+            <ReportProductTotals
+              products={groupReportMovements(periodMovements)}
+            />
+          )}
         </CardContent>
       </Card>
       <Card className="shadow-none">
