@@ -92,6 +92,7 @@ function ProtectedLayout() {
             <Link
               to="/laporan"
               search={{ ...defaultReportPeriod(), offset: 0 }}
+              activeOptions={{ includeSearch: false }}
               className="stock-nav-link"
               activeProps={{ "aria-current": "page" }}
             >

@@ -33,6 +33,7 @@ export function ReportView({
   onPeriodChange,
   summary,
   productTotals: externalProductTotals,
+  onExport,
   pagination,
 }: {
   products?: Product[];
@@ -41,6 +42,7 @@ export function ReportView({
   onPeriodChange?: (period: ReportPeriod) => void;
   summary?: { incoming: number; outgoing: number; count: number };
   productTotals?: ProductMovementTotal[];
+  onExport?: (kind: "stock" | "movements" | "products") => Promise<void>;
   pagination?: {
     offset: number;
     hasMore: boolean;
@@ -49,6 +51,8 @@ export function ReportView({
 }) {
   const [localPeriod, setPeriod] = useState(defaultReportPeriod);
   const [view, setView] = useState<"all" | "products">("all");
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
   const period = externalPeriod ?? localPeriod;
   const changePeriod = onPeriodChange ?? setPeriod;
   const invalidPeriod = period.from > period.to;
@@ -69,6 +73,30 @@ export function ReportView({
     periodMovements
       .filter((item) => item.direction === "out")
       .reduce((total, item) => total + item.quantity, 0);
+  async function handleExport(kind: "stock" | "movements" | "products") {
+    setExporting(true);
+    setExportError("");
+    try {
+      if (onExport) await onExport(kind);
+      else if (kind === "stock")
+        downloadCsv(stockCsv(products), `stok-${defaultReportPeriod().to}.csv`);
+      else
+        downloadCsv(
+          kind === "movements"
+            ? movementCsv(periodMovements)
+            : productTotalsCsv(productTotals),
+          `pergerakan-${kind}-${period.from}-${period.to}.csv`,
+        );
+    } catch (error) {
+      setExportError(
+        error instanceof Error
+          ? error.message
+          : "Laporan belum dapat diunduh. Coba lagi.",
+      );
+    } finally {
+      setExporting(false);
+    }
+  }
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -80,6 +108,16 @@ export function ReportView({
           spreadsheet.
         </p>
       </header>
+      {exportError && (
+        <p role="alert" className="text-sm text-destructive">
+          {exportError}
+        </p>
+      )}
+      {exporting && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Menyiapkan unduhan laporan…
+        </p>
+      )}
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle>
@@ -164,15 +202,14 @@ export function ReportView({
           </ToggleGroup>
           <Button
             variant="outline"
-            disabled={invalidPeriod || !periodMovements.length}
-            onClick={() =>
-              downloadCsv(
-                view === "all"
-                  ? movementCsv(periodMovements)
-                  : productTotalsCsv(productTotals),
-                `pergerakan-${view}-${period.from}-${period.to}.csv`,
-              )
+            disabled={
+              exporting ||
+              invalidPeriod ||
+              !(summary?.count ?? periodMovements.length)
             }
+            onClick={() => {
+              void handleExport(view === "all" ? "movements" : "products");
+            }}
           >
             <Download aria-hidden="true" />
             Unduh CSV pergerakan
@@ -230,13 +267,10 @@ export function ReportView({
           </CardTitle>
           <Button
             variant="outline"
-            disabled={!products.length}
-            onClick={() =>
-              downloadCsv(
-                stockCsv(products),
-                `stok-${defaultReportPeriod().to}.csv`,
-              )
-            }
+            disabled={exporting || !products.length}
+            onClick={() => {
+              void handleExport("stock");
+            }}
           >
             <Download aria-hidden="true" />
             Unduh CSV stok

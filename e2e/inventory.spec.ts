@@ -147,9 +147,72 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
     ).data,
   ).toHaveLength(3);
   const stranger = await playwright.request.newContext({
-    // A fulfilled restock clears handling, including when stock equals its minimum.
     baseURL: headers.Origin,
   });
+  const periodQuery = `from=${day}&to=${day}`;
+  const report = await (
+    await client.get(`/api/reports/movements?${periodQuery}&limit=1`)
+  ).json();
+  expect(report.data).toHaveLength(1);
+  expect(report.meta.hasMore).toBe(true);
+  expect(report.summary).toEqual({ incoming: 12, outgoing: 8, count: 3 });
+  expect(report.productTotals).toEqual([
+    expect.objectContaining({
+      productId: product.id,
+      incoming: 12,
+      outgoing: 8,
+    }),
+  ]);
+  expect(
+    (
+      await client.get("/api/reports/movements?from=2026-10-20&to=2026-10-01")
+    ).status(),
+  ).toBe(422);
+  const movementExport = await client.get(
+    `/api/reports/export?kind=movements&${periodQuery}`,
+  );
+  expect(movementExport.status()).toBe(200);
+  expect(movementExport.headers()["content-type"]).toContain("text/csv");
+  expect(movementExport.headers()["cache-control"]).toBe("private, no-store");
+  expect((await movementExport.text()).trim().split("\r\n")).toHaveLength(4);
+  expect(
+    await (
+      await client.get(`/api/reports/export?kind=products&${periodQuery}`)
+    ).text(),
+  ).toContain('"12","8","4"');
+  await client.patch(`/api/products/${product.id}`, {
+    headers,
+    data: { name: "=SUM(1,2)" },
+  });
+  expect(
+    await (await client.get("/api/reports/export?kind=stock")).text(),
+  ).toContain(`"'=SUM(1,2)"`);
+  await client.patch(`/api/products/${product.id}`, {
+    headers,
+    data: { name: "Produk uji" },
+  });
+  await page.goto(`/laporan?${periodQuery}`);
+  await expect(
+    page.getByRole("heading", { name: "Laporan Stok", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("radio", { name: "Per produk", exact: true }).click();
+  await expect(
+    page.getByRole("cell", { name: "12 unit", exact: true }),
+  ).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Unduh CSV pergerakan" }).click();
+  expect((await download).suggestedFilename()).toBe(
+    `pergerakan-products-${day}-${day}.csv`,
+  );
+  await page.screenshot({ path: ".data/report-desktop.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({ path: ".data/report-mobile.png", fullPage: true });
+  // A fulfilled restock clears handling, including when stock equals its minimum.
   expect(
     (
       await client.post(`/api/products/${product.id}/handled`, {
@@ -209,6 +272,24 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
     ).toBe(0);
     expect(
       (
+        await (
+          await stranger.get(`/api/reports/movements?${periodQuery}`)
+        ).json()
+      ).summary,
+    ).toEqual({ incoming: 0, outgoing: 0, count: 0 });
+    expect(
+      (
+        await (
+          await stranger.get(
+            `/api/reports/export?kind=movements&${periodQuery}`,
+          )
+        ).text()
+      )
+        .trim()
+        .split("\r\n"),
+    ).toHaveLength(1);
+    expect(
+      (
         await stranger.get(
           `/api/stock/movements/${detail.data.movements[0].id}`,
         )
@@ -253,6 +334,10 @@ test("inventory persists, isolates accounts, prevents duplicate saves and concur
     (await client.delete(`/api/products/${product.id}`, { headers })).status(),
   ).toBe(204);
   expect((await (await client.get("/api/products")).json()).data).toEqual([]);
+  expect(
+    (await (await client.get(`/api/reports/movements?${periodQuery}`)).json())
+      .summary,
+  ).toEqual({ incoming: 13, outgoing: 9, count: 5 });
   expect(
     (
       await client.get(`/api/stock/movements/${detail.data.movements[0].id}`)

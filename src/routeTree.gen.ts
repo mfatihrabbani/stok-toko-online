@@ -35,6 +35,8 @@ import { Route as ApiProductsIndexRouteImport } from './routes/api/products/inde
 import { Route as ApiProductsIdRouteImport } from './routes/api/products/$id'
 import { Route as ApiProductsLowStockRouteImport } from './routes/api/products/low-stock'
 import { Route as ApiProductsSummaryRouteImport } from './routes/api/products/summary'
+import { Route as ApiReportsExportRouteImport } from './routes/api/reports/export'
+import { Route as ApiReportsMovementsRouteImport } from './routes/api/reports/movements'
 import { Route as ApiStockIncomingRouteImport } from './routes/api/stock/incoming'
 import { Route as ApiStockOutgoingRouteImport } from './routes/api/stock/outgoing'
 import { Route as ApiAdminNotesIndexRouteImport } from './routes/api/admin/notes/index'
@@ -171,6 +173,16 @@ const ApiProductsSummaryRoute = ApiProductsSummaryRouteImport.update({
   path: '/api/products/summary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiReportsExportRoute = ApiReportsExportRouteImport.update({
+  id: '/api/reports/export',
+  path: '/api/reports/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReportsMovementsRoute = ApiReportsMovementsRouteImport.update({
+  id: '/api/reports/movements',
+  path: '/api/reports/movements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStockIncomingRoute = ApiStockIncomingRouteImport.update({
   id: '/api/stock/incoming',
   path: '/api/stock/incoming',
@@ -229,6 +241,8 @@ export interface FileRoutesByFullPath {
   '/api/products/$id': typeof ApiProductsIdRouteWithChildren
   '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
+  '/api/reports/export': typeof ApiReportsExportRoute
+  '/api/reports/movements': typeof ApiReportsMovementsRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
@@ -262,6 +276,8 @@ export interface FileRoutesByTo {
   '/api/products/$id': typeof ApiProductsIdRouteWithChildren
   '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
+  '/api/reports/export': typeof ApiReportsExportRoute
+  '/api/reports/movements': typeof ApiReportsMovementsRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
   '/api/categories': typeof ApiCategoriesIndexRoute
@@ -298,6 +314,8 @@ export interface FileRoutesById {
   '/api/products/$id': typeof ApiProductsIdRouteWithChildren
   '/api/products/low-stock': typeof ApiProductsLowStockRoute
   '/api/products/summary': typeof ApiProductsSummaryRoute
+  '/api/reports/export': typeof ApiReportsExportRoute
+  '/api/reports/movements': typeof ApiReportsMovementsRoute
   '/api/stock/incoming': typeof ApiStockIncomingRoute
   '/api/stock/outgoing': typeof ApiStockOutgoingRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
@@ -333,6 +351,8 @@ export interface FileRouteTypes {
     | '/api/products/$id'
     | '/api/products/low-stock'
     | '/api/products/summary'
+    | '/api/reports/export'
+    | '/api/reports/movements'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
     | '/api/categories/'
@@ -366,6 +386,8 @@ export interface FileRouteTypes {
     | '/api/products/$id'
     | '/api/products/low-stock'
     | '/api/products/summary'
+    | '/api/reports/export'
+    | '/api/reports/movements'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
     | '/api/categories'
@@ -401,6 +423,8 @@ export interface FileRouteTypes {
     | '/api/products/$id'
     | '/api/products/low-stock'
     | '/api/products/summary'
+    | '/api/reports/export'
+    | '/api/reports/movements'
     | '/api/stock/incoming'
     | '/api/stock/outgoing'
     | '/api/categories/'
@@ -423,6 +447,8 @@ export interface RootRouteChildren {
   ApiProductsIdRoute: typeof ApiProductsIdRouteWithChildren
   ApiProductsLowStockRoute: typeof ApiProductsLowStockRoute
   ApiProductsSummaryRoute: typeof ApiProductsSummaryRoute
+  ApiReportsExportRoute: typeof ApiReportsExportRoute
+  ApiReportsMovementsRoute: typeof ApiReportsMovementsRoute
   ApiStockIncomingRoute: typeof ApiStockIncomingRoute
   ApiStockOutgoingRoute: typeof ApiStockOutgoingRoute
   ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
@@ -618,6 +644,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProductsSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/reports/export': {
+      id: '/api/reports/export'
+      path: '/api/reports/export'
+      fullPath: '/api/reports/export'
+      preLoaderRoute: typeof ApiReportsExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reports/movements': {
+      id: '/api/reports/movements'
+      path: '/api/reports/movements'
+      fullPath: '/api/reports/movements'
+      preLoaderRoute: typeof ApiReportsMovementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stock/incoming': {
       id: '/api/stock/incoming'
       path: '/api/stock/incoming'
@@ -738,6 +778,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiProductsIdRoute: ApiProductsIdRouteWithChildren,
   ApiProductsLowStockRoute: ApiProductsLowStockRoute,
   ApiProductsSummaryRoute: ApiProductsSummaryRoute,
+  ApiReportsExportRoute: ApiReportsExportRoute,
+  ApiReportsMovementsRoute: ApiReportsMovementsRoute,
   ApiStockIncomingRoute: ApiStockIncomingRoute,
   ApiStockOutgoingRoute: ApiStockOutgoingRoute,
   ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,

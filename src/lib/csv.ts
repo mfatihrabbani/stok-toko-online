@@ -10,10 +10,10 @@ export function encodeCsv(rows: (string | number)[][]): string {
         row
           .map((value) => {
             let text = String(value);
-            if (
-              typeof value === "string" &&
-              /^[\s\u0000-\u001f]*[=+\-@]/.test(text)
-            )
+            const first = Array.from(text).find(
+              (char) => char.charCodeAt(0) > 32 && !/\s/.test(char),
+            );
+            if (typeof value === "string" && first && "=+-@".includes(first))
               text = "'" + text;
             return '"' + text.replaceAll('"', '""') + '"';
           })
@@ -78,9 +78,14 @@ export function productTotalsCsv(products: ProductMovementTotal[]) {
 }
 
 export function downloadCsv(content: string, filename: string) {
-  const url = URL.createObjectURL(
+  downloadBlob(
     new Blob([content], { type: "text/csv;charset=utf-8" }),
+    filename,
   );
+}
+
+export function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;

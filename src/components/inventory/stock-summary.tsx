@@ -222,6 +222,7 @@ export function StockSummary({ products }: { products: Product[] }) {
               r="24"
               fill="none"
               stroke="var(--destructive)"
+              opacity={emptyPercent > 0 ? 1 : 0}
               strokeWidth="6"
               strokeLinecap="round"
               strokeDasharray={`${(circumference * emptyPercent) / 100} ${circumference}`}

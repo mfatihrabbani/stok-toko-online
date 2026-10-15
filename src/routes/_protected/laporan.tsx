@@ -4,6 +4,7 @@ import { z } from "zod";
 import { defaultReportPeriod } from "@/lib/reports";
 import { useInventory } from "@/lib/use-inventory";
 import { getReportFn } from "@/lib/report-queries";
+import { downloadBlob } from "@/lib/csv";
 export const Route = createFileRoute("/_protected/laporan")({
   validateSearch: (search: Record<string, unknown>) => {
     const defaults = defaultReportPeriod();
@@ -39,6 +40,28 @@ function ReportPage() {
       movements={report.data}
       summary={report.summary}
       productTotals={report.productTotals}
+      onExport={async (kind) => {
+        const query = new URLSearchParams(
+          kind === "stock"
+            ? { kind }
+            : { kind, from: period.from, to: period.to },
+        );
+        const response = await fetch(
+          "/api/reports/export?" + query.toString(),
+          { credentials: "same-origin" },
+        );
+        if (!response.ok)
+          throw new Error(
+            response.status === 401
+              ? "Sesi berakhir. Masuk kembali untuk mengunduh laporan."
+              : "Laporan belum dapat diunduh. Coba lagi.",
+          );
+        const filename =
+          kind === "stock"
+            ? `stok-${defaultReportPeriod().to}.csv`
+            : `pergerakan-${kind}-${period.from}-${period.to}.csv`;
+        downloadBlob(await response.blob(), filename);
+      }}
       pagination={{
         offset: report.meta.offset,
         hasMore: report.meta.hasMore,

@@ -1,5 +1,9 @@
 # Persediaan stok.
 
+Halaman `/laporan` menyimpan rentang tanggal WIB dalam URL (bawaan bulan ini). `GET /api/reports/movements?from=YYYY-MM-DD&to=YYYY-MM-DD` mengembalikan total seluruh periode, agregasi per produk, dan 50 catatan per halaman. Tanggal akhir termasuk sampai sebelum tengah malam berikutnya; rentang terbalik ditolak. Total dan agregasi dibaca dalam transaksi konsisten, terpisah dari paginasi tabel.
+
+`GET /api/reports/export?kind=stock` mengunduh seluruh stok aktif saat ini. `kind=movements` atau `kind=products` memerlukan from/to dan mengekspor seluruh periode, termasuk riwayat produk diarsipkan. Semua ekspor hanya berisi data pemilik sesi, memakai CSV UTF-8 dengan BOM untuk Excel/Google Sheets, mengutip koma/tanda kutip/baris baru, serta menetralkan teks yang dapat dibaca sebagai rumus spreadsheet. Unduhan tidak dibatasi halaman yang sedang terlihat.
+
 Ringkasan laporan memakai kontrak `GET /api/products/summary`: `productCount`, `totalStock`, `lowCount`, `emptyCount`, dan `categoryCount`. Agregasi SQL hanya mencakup produk aktif pemilik sesi; akun kosong mendapat angka nol. Kartu dan ekspor stok halaman laporan memakai daftar produk aktif dari loader sesi yang sama. Periode pergerakan tidak memengaruhi stok saat ini.
 
 Laporan menggunakan tabel `stock_movements` dan migrasi 0004 yang sama dengan pencatatan serta riwayat. Indeks `movements_user_created_idx` melayani rentang waktu per akun; indeks `movements_product_created_idx` melayani rincian per produk. Laporan tidak membuat salinan data atau tabel pergerakan kedua. Snapshot nama/SKU dan produk yang diarsipkan tetap tersedia untuk laporan historis, sedangkan ringkasan stok saat ini hanya menghitung produk aktif.

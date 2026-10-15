@@ -3,6 +3,29 @@ import { db } from "@/db/index.server";
 import { stockMovements } from "@/db/schema/stock-movements";
 import { movementFields } from "./inventory.service.server";
 import type { ReportQuery } from "@/validators/reports";
+import type { ReportExportQuery } from "@/validators/reports";
+import { getInventory } from "./inventory.service.server";
+import { stockCsv, movementCsv, productTotalsCsv } from "@/lib/csv";
+
+export async function exportReport(userId: string, input: ReportExportQuery) {
+  if (input.kind === "stock") return stockCsv(await getInventory(userId));
+  if (input.kind === "products") {
+    const report = await getMovementReport(userId, {
+      ...input,
+      limit: 1,
+      offset: 0,
+    });
+    return productTotalsCsv(report.productTotals);
+  }
+  const rows = await db
+    .select(movementFields)
+    .from(stockMovements)
+    .where(reportScope(userId, input))
+    .orderBy(desc(stockMovements.createdAt), desc(stockMovements.id));
+  return movementCsv(
+    rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })),
+  );
+}
 
 export function reportScope(
   userId: string,

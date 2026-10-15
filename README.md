@@ -1,4 +1,21 @@
-# Base TanStack Postgres — ngodingpakeai starters
+# Stok Toko Online
+
+Aplikasi persediaan toko dengan produk, kategori, barang masuk/keluar, riwayat, peringatan stok, akun, laporan periode WIB, dan ekspor CSV. Tampilan mengikuti referensi DesainPakeAI dalam `DESIGN.md`.
+
+Pada komputer ini, buka **http://localhost:3001/sign-up** untuk membuat akun pertama. Isi nama pemilik/toko, email, dan kata sandi minimal 8 karakter. Akun mulai dengan stok kosong: tambahkan produk melalui **Produk** atau **Barang masuk**. Setiap akun memiliki persediaan terpisah.
+
+Untuk membuka kembali setelah server berhenti, jalankan dari folder ini:
+
+```sh
+podman machine start
+npm run dev -- --port=3001 --strictPort
+```
+
+Jika Podman menyatakan mesin sudah berjalan, lanjutkan perintah kedua. Terminal harus tetap terbuka selama aplikasi dipakai. Persiapan otomatis menyalakan database dan kotak email lokal serta menerapkan migrasi; data tetap tersimpan.
+
+Pemulihan kata sandi: klik **Lupa kata sandi**, masukkan email akun, lalu buka **http://localhost:8025** untuk membaca email pemulihan lokal. Email lokal tidak dikirim ke Gmail atau layanan email lain. Detail alur akun ada di [docs/accounts.md](docs/accounts.md), dan kontrak persediaan/laporan ada di [docs/inventory.md](docs/inventory.md).
+
+## Fondasi Starter TanStack Postgres
 
 The TanStack Start + PostgreSQL edition of the base starter: **TanStack Start (Vite + Nitro), Drizzle ORM, PostgreSQL, Better Auth, Tailwind CSS, shadcn/ui, and Motion**. It includes working accounts, a blank protected app, an authenticated Notes API demonstrating the backend standard, project skills, and Context7 configuration.
 

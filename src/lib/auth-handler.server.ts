@@ -29,7 +29,11 @@ export async function handleAuthRequest(request: Request) {
       const input = path.endsWith("sign-up/email")
         ? signUpSchema.parse({ ...credentials, name: record.name })
         : signInSchema.parse(credentials);
-      request = new Request(request, {
+      const headers = new Headers(request.headers);
+      headers.delete("content-length");
+      request = new Request(request.url, {
+        method: request.method,
+        headers,
         body: JSON.stringify({ ...record, ...input }),
       });
     } catch (error) {
