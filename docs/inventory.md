@@ -1,5 +1,7 @@
 # Persediaan stok.
 
+Laporan menggunakan tabel `stock_movements` dan migrasi 0004 yang sama dengan pencatatan serta riwayat. Indeks `movements_user_created_idx` melayani rentang waktu per akun; indeks `movements_product_created_idx` melayani rincian per produk. Laporan tidak membuat salinan data atau tabel pergerakan kedua. Snapshot nama/SKU dan produk yang diarsipkan tetap tersedia untuk laporan historis, sedangkan ringkasan stok saat ini hanya menghitung produk aktif.
+
 Produk toko disimpan di `products`. Akun baru mulai tanpa produk; data contoh desain tidak otomatis dimasukkan ke toko. API `/api/products`, `/api/products/summary`, dan `/api/products/:id` memerlukan sesi akun dan selalu menyaring pemilik di SQL.
 
 `stock_movements` menyimpan jenis masuk/keluar, jumlah positif, stok sebelum dan sesudah, catatan, waktu, serta nama dan SKU ketika pencatatan dilakukan. Tabel ini dipakai bersama oleh barang masuk, barang keluar, dan detail produk. Foreign key gabungan memastikan catatan dan produk dimiliki akun yang sama; constraint menjaga keseimbangan dan stok tidak negatif. Migrasi `0004_silly_angel.sql` sudah menyiapkan tabel ini, sehingga fitur barang masuk tidak membutuhkan tabel duplikat.
