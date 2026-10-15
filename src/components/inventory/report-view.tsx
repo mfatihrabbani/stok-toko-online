@@ -3,6 +3,7 @@ import { demoProducts, formatNumber, type Product } from "@/lib/inventory";
 import { demoMovements, type StockMovement } from "@/lib/movements";
 import { StockSummary } from "./stock-summary";
 import { ReportMovements } from "./report-movements";
+import { ReportMovementChart, ReportTotals } from "./report-totals";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,13 +116,15 @@ export function ReportView({
         </CardContent>
       </Card>
       <StockSummary products={products} />
+      <ReportTotals incoming={incoming} outgoing={outgoing} />
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle>
-            <h2 className="text-xl">Masuk & keluar</h2>
+            <h2 className="text-xl">Masuk & keluar pada periode ini</h2>
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <ReportMovementChart incoming={incoming} outgoing={outgoing} />
           <p className="text-sm leading-6">
             {formatNumber(incoming)} unit masuk · {formatNumber(outgoing)} unit
             keluar · {formatNumber(incoming - outgoing)} unit perubahan neto
