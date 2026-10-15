@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_protected/laporan")({
     deps.from > deps.to
       ? {
           data: [],
+          productTotals: [],
           summary: { incoming: 0, outgoing: 0, count: 0 },
           meta: { offset: 0, limit: 50, hasMore: false },
         }
@@ -37,6 +38,7 @@ function ReportPage() {
       products={products}
       movements={report.data}
       summary={report.summary}
+      productTotals={report.productTotals}
       pagination={{
         offset: report.meta.offset,
         hasMore: report.meta.hasMore,

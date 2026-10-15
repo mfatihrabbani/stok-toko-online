@@ -43,7 +43,30 @@ export async function getMovementReport(userId: string, input: ReportQuery) {
         .orderBy(desc(stockMovements.createdAt), desc(stockMovements.id))
         .limit(input.limit + 1)
         .offset(input.offset);
+      const productTotals = await tx
+        .select({
+          productId: stockMovements.productId,
+          productName: sql<string>`(array_agg(${stockMovements.productName} order by ${stockMovements.createdAt} desc, ${stockMovements.id} desc))[1]`,
+          productSku: sql<string>`(array_agg(${stockMovements.productSku} order by ${stockMovements.createdAt} desc, ${stockMovements.id} desc))[1]`,
+          incoming:
+            sql`coalesce(sum(${stockMovements.quantity}::bigint) filter (where ${stockMovements.direction} = 'in'), 0)`.mapWith(
+              Number,
+            ),
+          outgoing:
+            sql`coalesce(sum(${stockMovements.quantity}::bigint) filter (where ${stockMovements.direction} = 'out'), 0)`.mapWith(
+              Number,
+            ),
+        })
+        .from(stockMovements)
+        .where(scope)
+        .groupBy(stockMovements.productId);
+      productTotals.sort(
+        (a, b) =>
+          a.productName.localeCompare(b.productName, "id") ||
+          a.productId.localeCompare(b.productId),
+      );
       return {
+        productTotals,
         summary,
         period: { from: input.from, to: input.to },
         data: rows

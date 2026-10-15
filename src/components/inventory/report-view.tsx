@@ -7,6 +7,7 @@ import { ReportMovementChart, ReportTotals } from "./report-totals";
 import { ReportProductTotals } from "./report-product-totals";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { groupReportMovements } from "@/lib/reports";
+import type { ProductMovementTotal } from "@/lib/reports";
 import {
   downloadCsv,
   movementCsv,
@@ -31,6 +32,7 @@ export function ReportView({
   period: externalPeriod,
   onPeriodChange,
   summary,
+  productTotals: externalProductTotals,
   pagination,
 }: {
   products?: Product[];
@@ -38,6 +40,7 @@ export function ReportView({
   period?: ReportPeriod;
   onPeriodChange?: (period: ReportPeriod) => void;
   summary?: { incoming: number; outgoing: number; count: number };
+  productTotals?: ProductMovementTotal[];
   pagination?: {
     offset: number;
     hasMore: boolean;
@@ -54,6 +57,8 @@ export function ReportView({
     q: "",
     direction: "all",
   });
+  const productTotals =
+    externalProductTotals ?? groupReportMovements(periodMovements);
   const incoming =
     summary?.incoming ??
     periodMovements
@@ -164,7 +169,7 @@ export function ReportView({
               downloadCsv(
                 view === "all"
                   ? movementCsv(periodMovements)
-                  : productTotalsCsv(groupReportMovements(periodMovements)),
+                  : productTotalsCsv(productTotals),
                 `pergerakan-${view}-${period.from}-${period.to}.csv`,
               )
             }
@@ -214,9 +219,7 @@ export function ReportView({
           {view === "all" ? (
             <ReportMovements movements={periodMovements} />
           ) : (
-            <ReportProductTotals
-              products={groupReportMovements(periodMovements)}
-            />
+            <ReportProductTotals products={productTotals} />
           )}
         </CardContent>
       </Card>
