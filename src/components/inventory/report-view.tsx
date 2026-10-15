@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { demoProducts, formatNumber, type Product } from "@/lib/inventory";
 import { demoMovements, type StockMovement } from "@/lib/movements";
 import { StockSummary } from "./stock-summary";
+import { ReportMovements } from "./report-movements";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,6 +129,9 @@ export function ReportView({
           <p className="mt-3 text-xs text-muted-foreground">
             Data contoh untuk pratinjau laporan.
           </p>
+        </CardContent>
+        <CardContent className="px-0">
+          <ReportMovements movements={periodMovements} />
         </CardContent>
       </Card>
       <Card className="shadow-none">
