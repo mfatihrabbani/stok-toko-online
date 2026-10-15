@@ -1,5 +1,7 @@
 # Persediaan stok.
 
+Data contoh lokal dapat ditambahkan secara eksplisit lewat `npm run db:seed` setelah akun dibuat. Jika ada beberapa akun, gunakan `npm run db:seed -- --email EMAIL`; `--dry-run` hanya menampilkan pratinjau. Seed menambahkan 12 produk, 4 kategori, serta 60 pergerakan dua pekan terakhir dengan stok akhir yang konsisten. SKU yang sudah ada (termasuk arsip) dilewati, jadi menjalankannya ulang tidak menambah duplikat atau menimpa stok. Seed hanya menerima database lokal yang dikelola starter dan tidak dijalankan otomatis saat signup/setup.
+
 Halaman `/laporan` menyimpan rentang tanggal WIB dalam URL (bawaan bulan ini). `GET /api/reports/movements?from=YYYY-MM-DD&to=YYYY-MM-DD` mengembalikan total seluruh periode, agregasi per produk, dan 50 catatan per halaman. Tanggal akhir termasuk sampai sebelum tengah malam berikutnya; rentang terbalik ditolak. Total dan agregasi dibaca dalam transaksi konsisten, terpisah dari paginasi tabel.
 
 `GET /api/reports/export?kind=stock` mengunduh seluruh stok aktif saat ini. `kind=movements` atau `kind=products` memerlukan from/to dan mengekspor seluruh periode, termasuk riwayat produk diarsipkan. Semua ekspor hanya berisi data pemilik sesi, memakai CSV UTF-8 dengan BOM untuk Excel/Google Sheets, mengutip koma/tanda kutip/baris baru, serta menetralkan teks yang dapat dibaca sebagai rumus spreadsheet. Unduhan tidak dibatasi halaman yang sedang terlihat.

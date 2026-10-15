@@ -107,6 +107,12 @@
   font-size: 14px;
 }
 .stock-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -234,6 +240,9 @@
     display: block;
   }
   .stock-sidebar {
+    position: static;
+    height: auto;
+    overflow-y: visible;
     padding: 16px 20px;
     gap: 16px;
     border-inline-end: 0;
