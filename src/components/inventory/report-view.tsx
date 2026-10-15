@@ -7,6 +7,13 @@ import { ReportMovementChart, ReportTotals } from "./report-totals";
 import { ReportProductTotals } from "./report-product-totals";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { groupReportMovements } from "@/lib/reports";
+import {
+  downloadCsv,
+  movementCsv,
+  productTotalsCsv,
+  stockCsv,
+} from "@/lib/csv";
+import { Download } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,6 +145,21 @@ export function ReportView({
             <ToggleGroupItem value="all">Keseluruhan</ToggleGroupItem>
             <ToggleGroupItem value="products">Per produk</ToggleGroupItem>
           </ToggleGroup>
+          <Button
+            variant="outline"
+            disabled={invalidPeriod || !periodMovements.length}
+            onClick={() =>
+              downloadCsv(
+                view === "all"
+                  ? movementCsv(periodMovements)
+                  : productTotalsCsv(groupReportMovements(periodMovements)),
+                `pergerakan-${view}-${period.from}-${period.to}.csv`,
+              )
+            }
+          >
+            <Download aria-hidden="true" />
+            Unduh CSV pergerakan
+          </Button>
         </CardHeader>
         <CardContent>
           <ReportMovementChart incoming={incoming} outgoing={outgoing} />
@@ -164,6 +186,19 @@ export function ReportView({
           <CardTitle>
             <h2 className="text-xl">Stok saat ini</h2>
           </CardTitle>
+          <Button
+            variant="outline"
+            disabled={!products.length}
+            onClick={() =>
+              downloadCsv(
+                stockCsv(products),
+                `stok-${defaultReportPeriod().to}.csv`,
+              )
+            }
+          >
+            <Download aria-hidden="true" />
+            Unduh CSV stok
+          </Button>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
