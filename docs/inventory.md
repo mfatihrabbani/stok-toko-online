@@ -1,5 +1,7 @@
 # Persediaan stok.
 
+Ringkasan laporan memakai kontrak `GET /api/products/summary`: `productCount`, `totalStock`, `lowCount`, `emptyCount`, dan `categoryCount`. Agregasi SQL hanya mencakup produk aktif pemilik sesi; akun kosong mendapat angka nol. Kartu dan ekspor stok halaman laporan memakai daftar produk aktif dari loader sesi yang sama. Periode pergerakan tidak memengaruhi stok saat ini.
+
 Laporan menggunakan tabel `stock_movements` dan migrasi 0004 yang sama dengan pencatatan serta riwayat. Indeks `movements_user_created_idx` melayani rentang waktu per akun; indeks `movements_product_created_idx` melayani rincian per produk. Laporan tidak membuat salinan data atau tabel pergerakan kedua. Snapshot nama/SKU dan produk yang diarsipkan tetap tersedia untuk laporan historis, sedangkan ringkasan stok saat ini hanya menghitung produk aktif.
 
 Produk toko disimpan di `products`. Akun baru mulai tanpa produk; data contoh desain tidak otomatis dimasukkan ke toko. API `/api/products`, `/api/products/summary`, dan `/api/products/:id` memerlukan sesi akun dan selalu menyaring pemilik di SQL.
