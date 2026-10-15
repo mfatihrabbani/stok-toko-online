@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { demoProducts, formatNumber, type Product } from "@/lib/inventory";
 import { demoMovements, type StockMovement } from "@/lib/movements";
+import { StockSummary } from "./stock-summary";
 
 export function ReportView({
   products = demoProducts,
@@ -26,6 +27,7 @@ export function ReportView({
           spreadsheet.
         </p>
       </header>
+      <StockSummary products={products} />
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle>
