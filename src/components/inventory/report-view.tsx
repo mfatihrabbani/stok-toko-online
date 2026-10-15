@@ -30,11 +30,19 @@ export function ReportView({
   movements = demoMovements,
   period: externalPeriod,
   onPeriodChange,
+  summary,
+  pagination,
 }: {
   products?: Product[];
   movements?: StockMovement[];
   period?: ReportPeriod;
   onPeriodChange?: (period: ReportPeriod) => void;
+  summary?: { incoming: number; outgoing: number; count: number };
+  pagination?: {
+    offset: number;
+    hasMore: boolean;
+    onChange: (offset: number) => void;
+  };
 }) {
   const [localPeriod, setPeriod] = useState(defaultReportPeriod);
   const [view, setView] = useState<"all" | "products">("all");
@@ -46,12 +54,16 @@ export function ReportView({
     q: "",
     direction: "all",
   });
-  const incoming = periodMovements
-    .filter((item) => item.direction === "in")
-    .reduce((total, item) => total + item.quantity, 0);
-  const outgoing = periodMovements
-    .filter((item) => item.direction === "out")
-    .reduce((total, item) => total + item.quantity, 0);
+  const incoming =
+    summary?.incoming ??
+    periodMovements
+      .filter((item) => item.direction === "in")
+      .reduce((total, item) => total + item.quantity, 0);
+  const outgoing =
+    summary?.outgoing ??
+    periodMovements
+      .filter((item) => item.direction === "out")
+      .reduce((total, item) => total + item.quantity, 0);
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -168,9 +180,36 @@ export function ReportView({
             keluar · {formatNumber(incoming - outgoing)} unit perubahan neto
           </p>
           <p className="mt-3 text-xs text-muted-foreground">
-            Data contoh untuk pratinjau laporan.
+            {summary
+              ? `${formatNumber(summary.count)} catatan pada seluruh periode ini.`
+              : "Data contoh untuk pratinjau laporan."}
           </p>
         </CardContent>
+        {pagination && view === "all" && (
+          <div className="flex flex-wrap items-center justify-between gap-3 px-6">
+            <p className="text-xs text-muted-foreground">
+              Halaman {Math.floor(pagination.offset / 50) + 1}
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                disabled={pagination.offset === 0}
+                onClick={() =>
+                  pagination.onChange(Math.max(0, pagination.offset - 50))
+                }
+              >
+                Sebelumnya
+              </Button>
+              <Button
+                variant="outline"
+                disabled={!pagination.hasMore}
+                onClick={() => pagination.onChange(pagination.offset + 50)}
+              >
+                Berikutnya
+              </Button>
+            </div>
+          </div>
+        )}
         <CardContent className="px-0">
           {view === "all" ? (
             <ReportMovements movements={periodMovements} />

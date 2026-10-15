@@ -20,6 +20,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getCategoriesFn, getInventoryFn } from "@/lib/inventory-queries";
+import { defaultReportPeriod } from "@/lib/reports";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ context }) => {
@@ -90,6 +91,7 @@ function ProtectedLayout() {
             </Link>
             <Link
               to="/laporan"
+              search={{ ...defaultReportPeriod(), offset: 0 }}
               className="stock-nav-link"
               activeProps={{ "aria-current": "page" }}
             >
