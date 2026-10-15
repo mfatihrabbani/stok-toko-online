@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -30,6 +31,7 @@ export function CategoryManager({
   return (
     <>
       <Button variant="outline" onClick={() => setOpen(true)}>
+        <FolderOpen aria-hidden="true" />
         Kelola kategori
       </Button>
       <Dialog

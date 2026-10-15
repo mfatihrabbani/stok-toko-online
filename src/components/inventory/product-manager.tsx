@@ -13,7 +13,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -224,56 +230,71 @@ export function ProductManager() {
         </p>
       </header>
       <Card className="shadow-none">
-        <CardHeader>
-          <CategoryManager
-            categories={categories}
-            onChange={async (oldName, name) => {
-              const category = categoryRecords.find(
-                (item) => item.name === oldName,
-              );
-              if (oldName && !category)
-                throw new Error(
-                  "Muat ulang halaman untuk mendapatkan kategori terbaru.",
-                );
-              const result = await inventoryRequest<
-                { id: string; name: string } | undefined
-              >(
-                category ? `/api/categories/${category.id}` : "/api/categories",
-                {
-                  method:
-                    name === null ? "DELETE" : category ? "PATCH" : "POST",
-                  body: name === null ? undefined : { name },
-                },
-              );
-              setCategoryRecords((current) => [
-                ...current.filter((item) => item.id !== category?.id),
-                ...(result ? [result] : []),
-              ]);
-              if (oldName)
-                setProducts((current) =>
-                  current.map((item) =>
-                    item.category === oldName
-                      ? { ...item, category: result?.name || "Tanpa kategori" }
-                      : item,
-                  ),
-                );
-              setFilters(defaultProductFilters);
-              void refresh().catch(() => {});
-            }}
-          />
-          <Button className="w-fit self-end" onClick={() => setCreating(true)}>
-            <Plus data-icon="inline-start" aria-hidden="true" />
-            Tambah produk
-          </Button>
-          <CardTitle>
-            <h2 className="flex items-center gap-3 text-xl">
-              Semua produk <Badge variant="outline">{products.length}</Badge>
-            </h2>
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            Produk yang tersimpan pada toko Anda.
-          </p>
+        <CardHeader className="gap-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 space-y-2">
+              <CardTitle>
+                <h2 className="flex flex-wrap items-center gap-2.5 text-lg">
+                  Semua produk{" "}
+                  <Badge variant="outline" className="font-medium tabular-nums">
+                    {formatNumber(products.length)}
+                  </Badge>
+                </h2>
+              </CardTitle>
+              <CardDescription>
+                Produk yang tersimpan pada toko Anda.
+              </CardDescription>
+            </div>
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <CategoryManager
+                categories={categories}
+                onChange={async (oldName, name) => {
+                  const category = categoryRecords.find(
+                    (item) => item.name === oldName,
+                  );
+                  if (oldName && !category)
+                    throw new Error(
+                      "Muat ulang halaman untuk mendapatkan kategori terbaru.",
+                    );
+                  const result = await inventoryRequest<
+                    { id: string; name: string } | undefined
+                  >(
+                    category
+                      ? `/api/categories/${category.id}`
+                      : "/api/categories",
+                    {
+                      method:
+                        name === null ? "DELETE" : category ? "PATCH" : "POST",
+                      body: name === null ? undefined : { name },
+                    },
+                  );
+                  setCategoryRecords((current) => [
+                    ...current.filter((item) => item.id !== category?.id),
+                    ...(result ? [result] : []),
+                  ]);
+                  if (oldName)
+                    setProducts((current) =>
+                      current.map((item) =>
+                        item.category === oldName
+                          ? {
+                              ...item,
+                              category: result?.name || "Tanpa kategori",
+                            }
+                          : item,
+                      ),
+                    );
+                  setFilters(defaultProductFilters);
+                  void refresh().catch(() => {});
+                }}
+              />
+              <Button onClick={() => setCreating(true)}>
+                <Plus data-icon="inline-start" aria-hidden="true" />
+                Tambah produk
+              </Button>
+            </div>
+          </div>
           <StockFilters
+            className="mt-0 border-t pt-5"
             products={products}
             filters={filters}
             onChange={(changes) =>

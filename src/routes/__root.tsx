@@ -25,6 +25,13 @@ export const Route = createRootRoute({
       { name: "description", content: siteConfig.description },
     ],
     links: [
+      {
+        rel: "preload",
+        href: "/fonts/inter-variable.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "stylesheet", href: globalsCss },
       { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
     ],

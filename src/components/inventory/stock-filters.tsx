@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/native-select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   stockStatus,
   type Product,
@@ -22,11 +23,13 @@ export function StockFilters({
   filters,
   onChange,
   onReset,
+  className,
 }: {
   products: Product[];
   filters: ProductFilters;
   onChange: (changes: Partial<ProductFilters>) => void;
   onReset: () => void;
+  className?: string;
 }) {
   const categories = [
     ...new Set(products.map((product) => product.category)),
@@ -42,9 +45,10 @@ export function StockFilters({
     filters.category !== "all" ||
     filters.status !== "all";
   return (
-    <div className="stock-filters mt-4 flex flex-col gap-4">
+    <div className={cn("stock-filters mt-4 flex flex-col gap-4", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <ToggleGroup
+          className="max-w-full flex-wrap"
           type="single"
           value={filters.status}
           onValueChange={(value) => {
@@ -53,17 +57,26 @@ export function StockFilters({
           spacing={1}
           aria-label="Filter kondisi stok"
         >
-          <ToggleGroupItem value="all">
+          <ToggleGroupItem
+            value="all"
+            className="gap-1.5 px-2 sm:gap-2 sm:px-3"
+          >
             Semua produk{" "}
             <span className="text-xs text-muted-foreground">
               {products.length}
             </span>
           </ToggleGroupItem>
-          <ToggleGroupItem value="low">
+          <ToggleGroupItem
+            value="low"
+            className="gap-1.5 px-2 sm:gap-2 sm:px-3"
+          >
             Menipis{" "}
             <span className="text-xs text-muted-foreground">{lowCount}</span>
           </ToggleGroupItem>
-          <ToggleGroupItem value="empty">
+          <ToggleGroupItem
+            value="empty"
+            className="gap-1.5 px-2 sm:gap-2 sm:px-3"
+          >
             Habis{" "}
             <span className="text-xs text-muted-foreground">{emptyCount}</span>
           </ToggleGroupItem>
